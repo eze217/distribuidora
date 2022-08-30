@@ -322,64 +322,55 @@ def productoEliminaView(request,pk):
 class PedidosView(View):
     
     def get (self,request,*args,**kwargs):
-        HAS_ACCESS:False
+        HAS_ACCESS=False
         usuario = self.request.user
         
         context={}
 
-        if usuario.is_authenticated and usuario.is_active and usuario.has_perm('distribuidora_app.view_pedidomodel'):
-            
-            try:
-                grupo= usuario.groups.get()
-            except:
-                grupo= None
-            
+        if usuario.is_authenticated and usuario.is_active:
+            if usuario.has_perm('distribuidora_app.view_pedidomodel'):
 
+                HAS_ACCESS=True
 
-            HAS_ACCESS=True
-            user = User.objects.get(username=usuario)
-            if str(grupo)=='distribuidora' : 
-                pedidos_list=PedidoModel.objects.filter(state=True).order_by('-id')
-            elif str(grupo)=='proveedores' : 
-                proveedor= Perfil.objects.get(usuario=user)
-                pedidos_list=PedidoModel.objects.filter(state=True,proveedor=proveedor.proveedor).order_by('-id')
+                if usuario.is_staff : #empleados 
+                    pedidos_list=PedidoModel.objects.filter(state=True).order_by('-id')
+                else :
+                    if usuario.perfil.is_proveedor: 
+                        #proveedor= Perfil.objects.get(usuario=user)
+                        pedidos_list=PedidoModel.objects.filter(state=True,proveedor=usuario.perfil.proveedor).order_by('-id')
+                    elif usuario.perfil.is_cliente:
+                        pedidos_list=PedidoModel.objects.filter(state=True,usuario=usuario).order_by('-id')
+                
+                
+                context['HAS_ACCESS']= HAS_ACCESS
+                context['pedidos_list']=pedidos_list
+                
+                return render(request,'app/pedidos/pedidos.html',context )
             else:
-                pedidos_list=PedidoModel.objects.filter(state=True,usuario=user).order_by('-id')
-            
-            
-            context['HAS_ACCESS']= HAS_ACCESS
-            context['pedidos_list']=pedidos_list
-            
-            
-
-            return render(request,'app/pedidos/pedidos.html',context )
+                return redirect ('no_autorizado')
         else:
             return redirect ('landing_home')
 
 
+                
 
+                #======================== IMPORTANTE FALTA RESPUESTAS PARA CLIENTES =================
 class PedidoCreateView(View):
     
     def get (self,request,*args,**kwargs):
         HAS_ACCESS=False   
         usuario = self.request.user
-        user = User.objects.get(username=usuario)
         context={}
 
         if usuario.is_authenticated and usuario.is_active:
             HAS_ACCESS=True
-            if usuario.has_perm('distribuidora_app.add_pedidomodel'):
+            if usuario.has_perms(['distribuidora_app.add_pedidomodel','distribuidora_app.view_pedidomodel']):
 
-                try:
-                    grupo= usuario.groups.get()
-
-                except:
-                    grupo = None
-                
-                if str(grupo)== 'distribuidora':
-                    proveedoresList= ProveedorModel.objects.filter(state=True)
+                if usuario.is_staff:#si es empleado
+                    proveedoresList= ProveedorModel.objects.filter(state=True)#envio listado de proveedores para seleccionar
                     context['proveedoresList']=proveedoresList
-                else:
+                elif usuario.perfil.is_cliente:#valido sea cliente, proveedores NO hacen pedidos
+                    # ================= ATENCION =======================0
                     #Acá debo buscar los productos que tengo en stock, NO desde la tabla productos
                     productosList=ProductoModel.objects.filter(state=True)
                     context['productoList']=productosList
@@ -387,10 +378,7 @@ class PedidoCreateView(View):
                 context['HAS_ACCESS']=HAS_ACCESS
                 return render(request,'app/pedidos/nuevo_pedido.html',context)
             else:
-                return redirect('no_autorizado')
-
-
-              
+                return redirect('no_autorizado')     
         else:
             return redirect ('landing_home')
 
@@ -403,10 +391,9 @@ class PedidosJsonView(View):
         usuario = self.request.user
 
         if usuario.is_authenticated and usuario.is_active:
-            HAS_ACCESS=True
-            if usuario.has_perm('distribuidora_app.add_pedidomodel'):
-    
-                if str(usuario.groups.get())== 'distribuidora':
+            if usuario.has_perms(['distribuidora_app.add_pedidomodel','distribuidora_app.view_pedidomodel']):
+                HAS_ACCESS=True
+                if usuario.is_staff:#si soy empleado
                     #traigo proveedor
                     if pk != None:
                         proveedor = ProveedorModel.objects.filter(id=pk).first()
@@ -416,29 +403,15 @@ class PedidosJsonView(View):
                     #paso a dict
                     lista_productos=[]
                     for producto in productosList:
-                        lista_productos.append(producto.json())
-                     
-                    
+                        lista_productos.append(producto.json())           
                 else:
                     #Acá debo buscar los productos que tengo en stock, NO desde la tabla productos
                     productosList=ProductoModel.objects.filter(state=True)
                 
-                #producListJson=json.dumps(list(productosList),cls=DjangoJSONEncoder,sort_keys=True)
-
-
-                
-
-
-
                 context={
                         'data':lista_productos,
                         }
-
-                
-
                 return JsonResponse(context) 
-
-             
             else:
                 return redirect('no_autorizado')
 
@@ -455,12 +428,8 @@ class PedidosJsonView(View):
             if usuario.has_perm('distribuidora_app.add_pedidomodel'):
                 #Respuesta para empleados distribuidora
 
-                try:
-                    grupo= usuario.groups.get()
-                except:
-                    grupo= None
+                if usuario.is_staff:
 
-                if str(grupo)== 'distribuidora':
                     jsonData = json.loads(request.body)
                     metarCode = jsonData.get('Metar') 
                     if pk != None:
@@ -544,49 +513,44 @@ class PedidoDetalleView(View):
         HAS_ACCESS=False
         usuario = self.request.user
         
-        if usuario.is_authenticated and usuario.is_active and usuario.has_perm('distribuidora_app.view_pedidomodel'):
-            HAS_ACCESS= True
+        if usuario.is_authenticated and usuario.is_active:
+            if usuario.has_perm('distribuidora_app.view_pedidomodel'):
 
-            try:
-                grupo= usuario.groups.get()
-            except:
-                grupo= None
+                HAS_ACCESS= True
 
-            
-            user = User.objects.get(username=usuario)
-            if pk != None:
-                if str(grupo)=='distribuidora' : 
-                    #Traigo el pedido y el detalle y el FORM para ver y editar
+                if pk != None:
 
                     pedidos_seleccionado=PedidoModel.objects.get(state=True,id= pk)
                     detalle_pedido_seleccionado =PedidoDetalleModel.objects.filter(state=True, pedido= pedidos_seleccionado)
+                    #if usuario.is_staff : 
+                        #Traigo el pedido y el detalle y el FORM para ver y editar
 
                     form_pedido_seleccionado=PedidoCreateForm(instance=pedidos_seleccionado)
                     
                     lista_form_detalle=[]
                     for form_detalle in detalle_pedido_seleccionado:
                         lista_form_detalle.append(PedidoDetalleCreateForm(instance=form_detalle))
-
-                elif str(grupo)=='proveedores' : 
-                    proveedor= Perfil.objects.get(usuario=user)
-                    pedidos_list=PedidoModel.objects.filter(state=True,proveedor=proveedor.proveedor).order_by('-id')
+                    '''
+                    elif usuario.perfil.is_proveedor: 
+                        
+                        pedidos_list=PedidoModel.objects.filter(state=True,proveedor=usuario.perfil.proveedor).order_by('-id')
+                    elif usuario.perfil.is_cliente:
+                        pedidos_list=PedidoModel.objects.filter(state=True,usuario=usuario).order_by('-id')'''
+                    
+                    
+                    context={
+                        'usuario':usuario,
+                        'HAS_ACCESS':HAS_ACCESS,
+                        'pedido':pedidos_seleccionado,
+                        'detalle_pedido':detalle_pedido_seleccionado,
+                        'form_pedido':form_pedido_seleccionado,
+                        'form_detalle_pedido':lista_form_detalle
+                    }
                 else:
-                    pedidos_list=PedidoModel.objects.filter(state=True,usuario=user).order_by('-id')
+                    context={}
                 
-                
-                context={
-                    'usuario':usuario,
-                    'HAS_ACCESS':HAS_ACCESS,
-                    'pedido':pedidos_seleccionado,
-                    'detalle_pedido':detalle_pedido_seleccionado,
-                    'form_pedido':form_pedido_seleccionado,
-                    'form_detalle_pedido':lista_form_detalle
-                }
-            else:
-                context={}
-            
 
-            return render(request,'app/pedidos/pedido_detalle.html',context )
+                return render(request,'app/pedidos/pedido_detalle.html',context )
 
 
         else:

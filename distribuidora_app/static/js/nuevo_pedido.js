@@ -1,4 +1,5 @@
 
+
 function getCookie(name) { 
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
@@ -37,16 +38,18 @@ function capitalize(word) {
 let producto_a_comprar=[]
 
 function producto_proveedor(){
+   
     let proveedor_seleccionado= document.getElementById('proveedor').value
-    let url =('/pedidos_proveedor/'+proveedor_seleccionado).trim()
-  
+
+    let url=('/pedidos_proveedor/'+proveedor_seleccionado).trim()
+
 
     fetch(url)
     //Exito
     .then(response => response.json())  // convertir a json
     .then(json=>{
         
-        var div = document.getElementById('productos_proveedor')
+        var div = document.getElementById('productos_pedido')
         
         var div_contenido= document.getElementById('contenido')
         // reseteo el total al cambiar de proveedor y saco el boton de confirmar
@@ -123,7 +126,7 @@ function cuenta(){
     producto_a_comprar=[]
     //traigo tabla de ofertas
 
-    var tabla_proveedores=document.getElementById('productos_proveedor');
+    var tabla_proveedores=document.getElementById('productos_pedido');
     
     
     //RECORRO TABLA

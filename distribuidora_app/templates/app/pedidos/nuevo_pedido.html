@@ -23,7 +23,7 @@
             
                 
                 <select name="" id="proveedor" onchange="producto_proveedor()" >
-                    
+                    <option value="0" >------</option>
                     {%for proveedor in proveedoresList%}
                     
                         <option value="{{proveedor.id}}" >{{proveedor}}</option>
