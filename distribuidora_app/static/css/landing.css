@@ -1,0 +1,12 @@
+h1{
+    text-align: center;
+    margin-top: 30%;
+    font-size: 150px;
+}
+
+.principal{
+    height: 100vh;
+    *background-image:url( "../Imagenes/portada.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+}

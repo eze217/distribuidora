@@ -1,0 +1,38 @@
+
+
+.tabla_proveedores{
+    width: 100%;
+    border: 1px solid black;
+    height: 400px;
+    margin: 10px;
+    padding: 10px;
+    overflow-y: scroll;
+    border-radius: 20px;
+    
+}
+
+
+
+
+
+.centrado{
+
+    display: flex;        
+    justify-content: center;
+}
+
+.container .row h5{
+    margin-top: 20px;
+}
+
+.ver:hover{
+    color: green;
+    
+}
+
+
+.ver-rojo:hover{
+    color:red;
+}
+
+

@@ -1,0 +1,114 @@
+{%extends 'core_template/base_generic.html' %}
+{%load static%}
+{%block css%}
+
+<link href="{% static 'css/proveedores.css' %}" rel="stylesheet" type="text/css" >
+<link href="{% static 'css/nuevo_pedido.css' %}" rel="stylesheet" type="text/css" >
+
+{%endblock%}
+
+
+{%block content%}
+
+{% if  HAS_ACCESS %}
+
+<div class="container">
+<div class="container  " id="container_principal">
+    <h5>Creacion de pedidos:</h5>
+
+    <div class="row">
+        <div class="col-4">
+            {%if proveedoresList %}
+            <h5>Selecciona proveedor:</h5>
+            
+                
+                <select name="" id="proveedor" onchange="producto_proveedor()" >
+                    
+                    {%for proveedor in proveedoresList%}
+                    
+                        <option value="{{proveedor.id}}" >{{proveedor}}</option>
+                    {% endfor %}
+                    
+                </select>
+                {%endif%}
+            </div>
+            
+    </div>
+    <div class="row ">
+        <div class="col col-12 tabla_proveedores " >
+            <div >
+                <table class="table table-striped " id="productos_pedido">
+                    <thead>
+                        <tr>
+                            <th>
+                                Producto
+                            </th>
+                            <th>
+                                Costo
+                            </th>                 
+                            <th>
+                                Descripcion
+                            </th>
+                            <th>
+                                Cantidad
+                            </th>
+                            <th></th>
+                            <th>
+                                Costo Total
+                            </th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody id="contenido"> 
+                        {%if productoList %}
+                            {%for producto in productoList%}
+                                <tr>
+                                    <td>{{producto.name}}</td>
+                                    <td>{{producto.precio}}</td>
+                                    <td>{{producto.descripcion}}</td>
+                                    <td><input type="number" onchange="cuenta()"></td>
+                                    <td><input type="text" value="{{producto.id}}" class="oculto"></td>
+                                    <td></td>
+                                </tr>
+                            {%endfor%}
+
+                        {%endif%}
+
+                    </tbody>
+                </table>
+            </div>
+            
+        
+        </div>
+        
+
+    </div>
+
+        
+<h5 >Total del Pedido:</h5>
+<h6 id="total_general">0 €</h6>
+
+<button class="btn btn-success oculto" id="boton_confirmar_pedido" onclick="confirmo_pedido()">Confirmar</button>
+
+</div>
+    
+<div class="container" id="detalle_pedido">
+
+
+</div>
+<a href="{%url 'pedidos'%}" class="btn btn-secondary oculto" id="botonlistapedidos">Lista de pedidos</a>
+
+</div>
+{%endif%}
+
+
+
+{% block js%}
+
+<script src="{%  static 'js/nuevo_pedido.js' %}"></script>
+
+{% endblock %}
+
+
+
+{%endblock%}

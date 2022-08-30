@@ -1,0 +1,49 @@
+{%extends 'core_template/base_generic.html' %}
+{%load static%}
+{%block css%}
+<link href="{% static 'css/landing.css' %}" rel="stylesheet" type="text/css" >
+
+{%endblock%}
+
+
+{%block content%}
+
+<div class="container principal">
+    <div class="row">
+        <div class="col col-12">
+            <h1>Bienvenido</h1>
+
+        </div>
+    </div>
+</div>
+
+<h2>Distribuidora</h2>
+
+
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+LogIn  </button>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Ingresa Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancela</button>
+          <a href="{%url 'home-app'%}"  class="btn btn-primary" value=""> Confirma </a>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+{%endblock%}

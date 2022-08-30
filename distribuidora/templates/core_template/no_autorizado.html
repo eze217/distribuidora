@@ -1,0 +1,45 @@
+{%extends 'core_template/base_generic.html' %}
+{%load static%}
+{%block css%}
+
+
+
+{%endblock%}
+
+
+{%block content%}
+
+{% if  HAS_ACCESS %}
+
+<style>
+    .atencion{
+        color: brown;
+        margin-top: 50px;
+        text-align: center;
+    }
+</style>
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-12">
+            <h1 class="atencion">NO POSEE ACCESO</h1>
+        </div>
+    </div>
+
+</div>
+
+
+{%endif%}
+
+
+
+{% block js%}
+
+
+
+{% endblock %}
+
+
+
+{%endblock%}

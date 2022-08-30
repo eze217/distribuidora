@@ -1,0 +1,65 @@
+
+{%extends 'core_template/base_generic.html' %}
+{%load static%}
+{%block css%}
+
+<link href="{% static 'css/home.css' %}" rel="stylesheet" type="text/css" >
+
+{%endblock%}
+
+
+{%block content%}
+
+{% if  HAS_ACCESS %}
+
+
+<div class="container ">
+    <div class="row centrado">
+        <div class="col col-4 dashboard ">
+            <p><strong>Pedidos Solicitados</strong> </p>
+            <h1>30</h1>
+        </div>
+        <div class="col col-4 dashboard"> 
+            <p><strong>Pedidos En Preparacion</strong> </p>
+            <h1>30</h1>
+        </div>
+        <div class="col col-4 dashboard">
+            <p><strong>Pedidos En Reparto</strong> </p>
+            <h1>30</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col col-12 notificaciones-dashboard">Notificaciones
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Nombre
+                        </th>
+                        <th>
+                            Telefono
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            proveedor
+                        </td>
+                        <td>
+                            telefono
+                        </td>
+                    </tr>
+                </tbody>
+              </table>
+        </div>
+    </div>
+
+</div>
+
+
+{%endif%}
+
+
+{%endblock%}
+
