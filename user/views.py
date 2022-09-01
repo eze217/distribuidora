@@ -16,6 +16,7 @@ class ControlLogin(View):
         if  not self.request.user.is_authenticated: 
                   
             return render(request,'login.html',{})
+
         else:
             return redirect('home-app')
     
@@ -23,9 +24,16 @@ class ControlLogin(View):
         if  not self.request.user.is_authenticated:
             user_name=request.POST['user_name']
             user_pass=request.POST['user_pass']
-
-            user = User.objects.get(username=user_name)
+            
             context={}
+            
+            try:
+                user = User.objects.get(username=user_name)
+            except:
+                context['mensaje']='Usuario inexistente'    
+                return render(request,'login.html',context)
+
+            
             if user.is_active:
                 if user is not None and user.check_password(user_pass):
                     print(user_name,user_pass,user)
@@ -44,4 +52,4 @@ class ControlLogin(View):
 def logout_user(request):
     if request.user.is_authenticated:
         logout(request)
-        return redirect('login')          
+        return redirect('landing_home')          

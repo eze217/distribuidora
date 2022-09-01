@@ -25,6 +25,7 @@ urlpatterns = [
     path('pedidos_create/',PedidoCreateView.as_view(),name='pedido_create'),
     path('pedidos_proveedor/',PedidosJsonView.as_view(),name='pedidos_rest_sipk'),
     path('pedidos_proveedor/<int:pk>',PedidosJsonView.as_view(),name='pedidos_rest'),
+    #path('cambio_estado_pedido/<estado>/<int:pk>',cambio_estado_pedido,name='cambio_estado_pedido'),
     
 
 

@@ -8,23 +8,41 @@
 
 {%block content%}
 
-<div class="container principal">
-    <div class="row">
+<div class="container ">
+    <div class="row principal">
         <div class="col col-12">
             <h1>Bienvenido</h1>
 
         </div>
     </div>
+
 </div>
 
-<h2>Distribuidora</h2>
+<div class="row">
+  <div class="col col-12 " >
+    <h2>Distribuidora</h2>
+     <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+      LogIn  </button>
+      
 
-
-
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-LogIn  </button>
   
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   <!-- Modal -->
   <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -34,11 +52,36 @@ LogIn  </button>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          ...
+            
+            
+                    <div class="card shadow-2-strong" style="border-radius: 1rem;">
+                      <div class="card-body p-5 text-center">
+            
+                        <h3 class="mb-5">Ingresar</h3>
+          
+                        <form action="{%url 'login'%}" method="post"> {% csrf_token %}
+                        <div class="form-outline mb-4">
+                          <input type="text" name="user_name" class="form-control form-control-lg" />
+                          <label class="form-label" for="typeEmailX-2">Usuario</label>
+                        </div>
+            
+                        <div class="form-outline mb-4">
+                          <input type="password" id="typePasswordX-2" name="user_pass" class="form-control form-control-lg" />
+                          <label class="form-label" for="typePasswordX-2">Contraseña</label>
+                        </div>
+          
+                        <button class="btn btn-success btn-lg btn-block" type="submit">Confirmar</button>
+                      </form>
+                        <p style="color: red;">{{mensaje}}</p>
+            
+                      </div>
+                    </div>
+             
+            
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancela</button>
-          <a href="{%url 'home-app'%}"  class="btn btn-primary" value=""> Confirma </a>
+          <a href="{%url 'home-app'%}"  class="btn btn-secondary" value=""> Registrarse </a>
           
         </div>
       </div>

@@ -1,3 +1,10 @@
 .oculto{
     display: none;
 }
+
+#confirmo_cambio{
+    
+    color: green;
+    background: none;
+    border: none;
+}

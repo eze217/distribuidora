@@ -233,7 +233,7 @@ function confirmo_pedido(){
         "Accept": "application/json",
         'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 'Metar': producto_a_comprar, }),
+        body: JSON.stringify({ 'Metar': producto_a_comprar, 'almacen': 1 }),
 
 
     }).then(res => res.json())

@@ -6,7 +6,9 @@ from sre_parse import State
 from django.shortcuts import render,redirect
 from django.views import View
 from django.http.response import JsonResponse
-from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm,ProductoEditForm,PedidoDetalleCreateForm,PedidoCreateForm
+from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm,ProductoEditForm
+from distribuidora_app.forms import PedidoDetalleCreateForm,PedidoCreateForm
+from distribuidora_app.forms import PedidoEdicionForm
 
 from distribuidora_app.models import PedidoDetalleModel, PedidoModel, ProveedorModel,ProductoModel
 
@@ -333,7 +335,7 @@ class PedidosView(View):
                 HAS_ACCESS=True
 
                 if usuario.is_staff : #empleados 
-                    pedidos_list=PedidoModel.objects.filter(state=True).order_by('-id')
+                    pedidos_list=PedidoModel.objects.filter(state=True).order_by('-id')#.exclude(estado='ANULADO')
                 else :
                     if usuario.perfil.is_proveedor: 
                         #proveedor= Perfil.objects.get(usuario=user)
@@ -432,6 +434,9 @@ class PedidosJsonView(View):
 
                     jsonData = json.loads(request.body)
                     metarCode = jsonData.get('Metar') 
+                    almacen= jsonData.get('almacen')
+
+                    print(almacen)
                     if pk != None:
                         try:
                             error= False
@@ -507,7 +512,7 @@ class PedidosJsonView(View):
       
         return redirect('pedidos')
   
-        
+       
 class PedidoDetalleView(View):
     def get (self,request,pk,*args,**kwargs):
         HAS_ACCESS=False
@@ -556,3 +561,55 @@ class PedidoDetalleView(View):
         else:
             return redirect ('landing_home')
         
+    def post(self,request,pk,*args,**kwargs):
+        if request.user.is_authenticated and request.user.is_active:
+            
+            usuario= request.user
+            
+            if  usuario.is_staff and usuario.has_perm('distribuidora_app.change_pedidomodel') or usuario.perfil.is_proveedor:
+             
+                pedido= PedidoModel.objects.get(id=pk)
+                
+                form_pedido=PedidoEdicionForm(request.POST,instance=pedido)
+                
+                if form_pedido.is_valid():
+                    pedido = form_pedido.save()
+                
+
+                return redirect('pedidos_detalle',pk)
+           
+
+            else:
+                return redirect('no_autorizado')
+        else:
+            return redirect('landing_home')
+                
+
+
+
+'''
+def cambio_estado_pedido(request,estado,pk):
+    
+    if request.method == 'GET':
+        
+        if request.user.is_authenticated and request.user.is_active:
+            
+            usuario= request.user
+            
+            if  usuario.is_staff and usuario.has_perm('distribuidora_app.change_pedidomodel'):
+             
+                nuevo_estado=estado      
+                pedido= PedidoModel.objects.get(id=pk)
+               
+                form_pedido=PedidoCreateForm(estado=nuevo_estado,instance=pedido)
+                print(form_pedido.is_valid())
+                if form_pedido.is_valid():
+                    print('ok')
+                    pedido= form_pedido.save(commit=False)
+                    pedido.estado=nuevo_estado
+                    pedido = form_pedido.save()
+
+                    return JsonResponse({'ok':True})
+    
+    return JsonResponse({'ok':True})'''
+

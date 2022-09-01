@@ -2,12 +2,14 @@ from dataclasses import fields
 from django.forms import forms,ModelForm
 from distribuidora_app.models import ProveedorModel,ProductoModel,PedidoModel,PedidoDetalleModel
 
+# ============================ PROVEEDOR  ============================
 class ProveedorForm(ModelForm):
     class Meta:
         model=ProveedorModel
         fields='__all__'
         exclude=['state']
         
+# ============================ PRODUCTO  ============================
 
 class ProductoAdminForm(ModelForm):
     class Meta:
@@ -28,6 +30,7 @@ class ProductoEditForm(ModelForm):
         model=ProductoModel
         fields=['name','descripcion','proveedor']
 
+# ============================ PEDIDOS  ============================
 
 class PedidoCreateForm(ModelForm):
     class Meta:
@@ -40,3 +43,9 @@ class PedidoDetalleCreateForm(ModelForm):
         model= PedidoDetalleModel
         fields='__all__'
         exclude= ['state','pedido']
+
+class PedidoEdicionForm(ModelForm):
+    class Meta:
+        model= PedidoModel
+        fields=['estado']
+        

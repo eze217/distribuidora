@@ -30,7 +30,7 @@ function suma_total(){
     total_general_info.innerHTML = costo_total+ ' €'
 }
 
-function edito_pedido(event){
+function edito_pedido(){
     let datos_pedido=document.getElementById('datos_pedidos')
     let form_datos=document.getElementById ('datos_pedidos_form')
     let lapiz_edicion= document.getElementById('lapiz_edicion')
@@ -39,4 +39,23 @@ function edito_pedido(event){
     lapiz_edicion.classList.toggle('oculto')
     
 
+}
+
+
+function cambio_estado_pedido(){
+    /*
+    let form_datos=document.getElementById ('datos_pedidos_form')
+    let pedido_id= document.getElementById('pedido_id').value
+
+    let url = ('/cambio_estado_pedido/'+ form_datos.children.item(0).value+'/'+pedido_id).trim()
+
+    fetch(url)
+    //Exito
+    .then(response => response.json())  // convertir a json
+    .then(json=>{
+        console.log(json.ok)
+    })
+    .catch(err => console.log('Solicitud fallida', err)); // Capturar errores
+    edito_pedido()
+    */
 }

@@ -35,7 +35,7 @@ class AlmacenModel( BasicModel):
         return self.name
 
 
-class ProveedorModel(BasicModel):
+class Cuenta(BasicModel):
     name= models.CharField(verbose_name='Nombre',max_length=100,blank=False,null=False)
     domicilio= models.CharField(verbose_name='Domicilio',max_length=200,blank=False,null=False)
     telefono= models.CharField(verbose_name='Telefono',max_length=15,blank=False,null=False)
