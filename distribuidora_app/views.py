@@ -1,7 +1,3 @@
-from contextlib import ContextDecorator
-from itertools import product
-from multiprocessing import context
-from sre_parse import State
 
 from django.shortcuts import render,redirect
 from django.views import View
@@ -10,7 +6,7 @@ from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm
 from distribuidora_app.forms import PedidoDetalleCreateForm,PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 
-from distribuidora_app.models import PedidoDetalleModel, PedidoModel, ProveedorModel,ProductoModel
+from distribuidora_app.models import PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel
 
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
@@ -81,20 +77,20 @@ class ProveedoresView(View):
         usuario = self.request.user
         if usuario.is_authenticated and usuario.is_active:
         
-            if usuario.is_staff and usuario.has_perm('distribuidora_app.view_proveedormodel'):
+            if usuario.is_staff and usuario.has_perm('distribuidora_app.view_cuentamodel'):
 
                 HAS_ACCESS=True
                 form=ProveedorForm()
 
 
-                proveedoresList= ProveedorModel.objects.filter(state=True).all()
+                proveedoresList= CuentaModel.objects.filter(state=True).all()
 
                 
 
                 context['HAS_ACCESS']= HAS_ACCESS          
                 context['proveedores_list']=proveedoresList
                 
-                if  usuario.has_perm('distribuidora_app.add_proveedormodel'):
+                if  usuario.has_perm('distribuidora_app.add_cuentamodel'):
                     context['form']=form
 
                 return render(request,'app/proveedores/proveedores.html',context )
@@ -107,14 +103,14 @@ class ProveedoresView(View):
        
         usuario = self.request.user
         if usuario.is_authenticated and usuario.is_active:
-            if not usuario.is_staff and not usuario.has_perm('distribuidora_app.add_proveedormodel'):
+            if not usuario.is_staff and not usuario.has_perm('distribuidora_app.add_cuentamodel'):
                 return redirect('no_autorizado')
             
             formulario= ProveedorForm(request.POST)
 
             if formulario.is_valid():
                 
-                nuevo_proveedor= ProveedorModel.objects.create(name=formulario.cleaned_data['name'],domicilio=formulario.cleaned_data['domicilio'],telefono=formulario.cleaned_data['telefono'],cif=formulario.cleaned_data['cif'])
+                nuevo_proveedor= CuentaModel.objects.create(name=formulario.cleaned_data['name'],domicilio=formulario.cleaned_data['domicilio'],telefono=formulario.cleaned_data['telefono'],cif=formulario.cleaned_data['cif'])
                 nuevo_proveedor.save()
 
             return redirect('proveedores' )
@@ -128,14 +124,14 @@ class ProveedorDetalleView(View):
     def get(self,request,pk,*args,**kwargs):
         HAS_ACCESS:False
         context={}
-        proveedor= ProveedorModel.objects.filter(state=True,pk=pk).first()
+        proveedor= CuentaModel.objects.filter(state=True,pk=pk).first()
         usuario=self.request.user
         if usuario.is_authenticated and usuario.is_active:
-            if  usuario.is_staff and usuario.has_perm('distribuidora_app.view_proveedormodel'):
+            if  usuario.is_staff and usuario.has_perm('distribuidora_app.view_cuentamodel'):
                 
                 context['HAS_ACCESS']= True
                 context['proveedor']= proveedor
-                if  usuario.has_perm('distribuidora_app.change_proveedormodel'):
+                if  usuario.has_perm('distribuidora_app.change_cuentamodel'):
                     form_editable= ProveedorForm(instance=proveedor)            
                     context['form']= form_editable
 
@@ -148,10 +144,10 @@ class ProveedorDetalleView(View):
 
     def post(self,request,pk,*args,**kwargs):
         usuario=self.request.user
-        proveedor= ProveedorModel.objects.filter(state=True,pk=pk).first()
+        proveedor= CuentaModel.objects.filter(state=True,pk=pk).first()
 
         if usuario.is_authenticated and usuario.is_active:
-            if  usuario.is_staff and usuario.has_perm('distribuidora_app.change_proveedormodel'):         
+            if  usuario.is_staff and usuario.has_perm('distribuidora_app.change_cuentamodel'):         
                 form_editable= ProveedorForm(request.POST,instance=proveedor)
                 if form_editable.is_valid():
                     proveedor = form_editable.save()
@@ -166,10 +162,10 @@ class ProveedorDetalleView(View):
 
 def proveedorEliminaView(request,pk):
     usuario=request.user
-    proveedor= ProveedorModel.objects.filter(state=True,pk=pk).first()
+    proveedor= CuentaModel.objects.filter(state=True,pk=pk).first()
 
     if usuario.is_authenticated and usuario.is_active:
-        if  usuario.is_staff and usuario.has_perm('distribuidora_app.delete_proveedormodel'):
+        if  usuario.is_staff and usuario.has_perm('distribuidora_app.delete_cuentamodel'):
             
             proveedor.state=False
             proveedor.save()
@@ -208,7 +204,7 @@ class ProductosView(View):
             
                 elif perfil.is_proveedor : 
                     
-                    productosList= ProductoModel.objects.filter(state=True ,proveedor=perfil.proveedor).all()
+                    productosList= ProductoModel.objects.filter(state=True ,proveedor=perfil.cuenta).all()
                     form_Producto=ProductoForm()
                 else:
                     return redirect('no_autorizado')
@@ -256,7 +252,7 @@ class ProductosView(View):
                     if form_Producto.is_valid():
                         try:#si es proveedor
                             producto_editable= form_Producto.save(commit=False)
-                            producto_editable.proveedor = usuario.perfil.proveedor
+                            producto_editable.proveedor = usuario.perfil.cuenta
                             producto_editable= form_Producto.save()
                         except:
 
@@ -277,7 +273,7 @@ class ProductosView(View):
                         producto= ProductoModel()
                         try:#si es proveedor
                             producto = form_Producto.save(commit=False)
-                            producto.proveedor= usuario.perfil.proveedor
+                            producto.proveedor= usuario.perfil.cuenta
                             producto = form_Producto.save()
                             
                         except:
@@ -339,7 +335,7 @@ class PedidosView(View):
                 else :
                     if usuario.perfil.is_proveedor: 
                         #proveedor= Perfil.objects.get(usuario=user)
-                        pedidos_list=PedidoModel.objects.filter(state=True,proveedor=usuario.perfil.proveedor).order_by('-id')
+                        pedidos_list=PedidoModel.objects.filter(state=True,proveedor=usuario.perfil.cuenta).order_by('-id')
                     elif usuario.perfil.is_cliente:
                         pedidos_list=PedidoModel.objects.filter(state=True,usuario=usuario).order_by('-id')
                 
@@ -369,7 +365,7 @@ class PedidoCreateView(View):
             if usuario.has_perms(['distribuidora_app.add_pedidomodel','distribuidora_app.view_pedidomodel']):
 
                 if usuario.is_staff:#si es empleado
-                    proveedoresList= ProveedorModel.objects.filter(state=True)#envio listado de proveedores para seleccionar
+                    proveedoresList= CuentaModel.objects.filter(state=True)#envio listado de proveedores para seleccionar
                     context['proveedoresList']=proveedoresList
                 elif usuario.perfil.is_cliente:#valido sea cliente, proveedores NO hacen pedidos
                     # ================= ATENCION =======================0
@@ -398,7 +394,7 @@ class PedidosJsonView(View):
                 if usuario.is_staff:#si soy empleado
                     #traigo proveedor
                     if pk != None:
-                        proveedor = ProveedorModel.objects.filter(id=pk).first()
+                        proveedor = CuentaModel.objects.filter(id=pk).first()
 
                     productosList= ProductoModel.objects.filter(state=True,proveedor=proveedor)
 
@@ -436,14 +432,14 @@ class PedidosJsonView(View):
                     metarCode = jsonData.get('Metar') 
                     almacen= jsonData.get('almacen')
 
-                    print(almacen)
+                   
                     if pk != None:
                         try:
                             error= False
                             #busco proveedor al que se le hace el pedido
-                            proveedor_pedido = ProveedorModel.objects.get(state=True,id= pk)
+                            proveedor_pedido = CuentaModel.objects.get(state=True,id= pk)
                             #Creo el pedido
-                            nuevo_pedido = PedidoModel.objects.create(estado='SOLICITADO',proveedor=proveedor_pedido,usuario=usuario,tipo_pedido='COMPRA')
+                            nuevo_pedido = PedidoModel.objects.create(estado='SOLICITADO',cuenta=proveedor_pedido,usuario=usuario,tipo_pedido='COMPRA')
                     
                             for pedido in metarCode:
 
@@ -538,7 +534,7 @@ class PedidoDetalleView(View):
                     '''
                     elif usuario.perfil.is_proveedor: 
                         
-                        pedidos_list=PedidoModel.objects.filter(state=True,proveedor=usuario.perfil.proveedor).order_by('-id')
+                        pedidos_list=PedidoModel.objects.filter(state=True,proveedor=usuario.perfil.cuenta).order_by('-id')
                     elif usuario.perfil.is_cliente:
                         pedidos_list=PedidoModel.objects.filter(state=True,usuario=usuario).order_by('-id')'''
                     

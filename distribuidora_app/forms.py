@@ -1,11 +1,11 @@
 from dataclasses import fields
 from django.forms import forms,ModelForm
-from distribuidora_app.models import ProveedorModel,ProductoModel,PedidoModel,PedidoDetalleModel
+from distribuidora_app.models import CuentaModel,ProductoModel,PedidoModel,PedidoDetalleModel
 
 # ============================ PROVEEDOR  ============================
 class ProveedorForm(ModelForm):
     class Meta:
-        model=ProveedorModel
+        model=CuentaModel
         fields='__all__'
         exclude=['state']
         

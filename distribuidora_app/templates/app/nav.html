@@ -29,7 +29,7 @@
                 <a class="nav-link" href="#">Stock</a>
               </li>
               {%endif%}
-              {% if perms.distribuidora_app.view_proveedormodel %}
+              {% if perms.distribuidora_app.view_cuentamodel %}
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/proveedores/' %} active {% endif %}" href="{%url 'proveedores'%}">Proveedores</a>           
               </li>

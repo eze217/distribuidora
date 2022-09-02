@@ -35,16 +35,16 @@ class AlmacenModel( BasicModel):
         return self.name
 
 
-class Cuenta(BasicModel):
+class CuentaModel(BasicModel):
     name= models.CharField(verbose_name='Nombre',max_length=100,blank=False,null=False)
     domicilio= models.CharField(verbose_name='Domicilio',max_length=200,blank=False,null=False)
     telefono= models.CharField(verbose_name='Telefono',max_length=15,blank=False,null=False)
-    cif= models.CharField(verbose_name='CIF',max_length=20,blank=False,null=False)
+    nro_identificacion= models.CharField(verbose_name='CIF',max_length=20,blank=False,null=False)
     observaciones=models.CharField(verbose_name='Notas',max_length=200,blank=True,null=True,default='---')
 
     class Meta:
-        verbose_name= 'Proveedor'
-        verbose_name_plural='Proveedores'
+        verbose_name= 'Cuenta'
+        verbose_name_plural='Cuentas'
     
     def __str__(self):
         return self.name
@@ -56,7 +56,7 @@ class ProductoModel(BasicModel):
     descripcion= models.CharField(verbose_name='Descripción',max_length=200)
     
     
-    proveedor = models.ForeignKey(ProveedorModel,on_delete=models.CASCADE)
+    proveedor = models.ForeignKey(CuentaModel,on_delete=models.CASCADE)
 
     class Meta:
         verbose_name= 'Producto'
@@ -105,7 +105,7 @@ class PedidoModel (BasicModel):
     )
 
     estado = models.CharField(verbose_name='Estado ', choices=TYPE_CHOICES, max_length=20)
-    proveedor = models.ForeignKey(ProveedorModel,on_delete=models.CASCADE)
+    cuenta = models.ForeignKey(CuentaModel,on_delete=models.CASCADE,null=True,blank=True)
     usuario = models.ForeignKey(User,on_delete=models.CASCADE)
     TYPE_PEDIDO=(('COMPRA','COMPRA'),('VENTA','VENTA'))
     tipo_pedido= models.CharField(verbose_name='Tipo de pedido',choices=TYPE_PEDIDO,max_length=10)
@@ -121,7 +121,7 @@ class PedidoModel (BasicModel):
         data={
             'id':self.id,
             'estado':self.estado,
-            'proveedor':self.proveedor.name,
+            'proveedor':self.cuenta.name,
             'usuario':self.usuario.username,
             'tipo_pedido':self.tipo_pedido
 
