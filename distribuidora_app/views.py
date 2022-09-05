@@ -36,6 +36,7 @@ def group_required(*group_names):
 
 #@group_required('distribuidores','proveedores') 
 def home (request):
+    
     if request.method == 'GET':
         if request.user.is_authenticated:
             return redirect('home-app')
@@ -96,8 +97,9 @@ class ProveedoresView(View):
                 return render(request,'app/proveedores/proveedores.html',context )
             else:
                 return redirect('no_autorizado')
-        else:
+        else:        
             return redirect ('landing_home')
+        
     
     def post(self,request,*args,**kwargs):
        
@@ -126,11 +128,19 @@ class ProveedorDetalleView(View):
         context={}
         proveedor= CuentaModel.objects.filter(state=True,pk=pk).first()
         usuario=self.request.user
+        
         if usuario.is_authenticated and usuario.is_active:
+            print(usuario)
             if  usuario.is_staff and usuario.has_perm('distribuidora_app.view_cuentamodel'):
                 
                 context['HAS_ACCESS']= True
                 context['proveedor']= proveedor
+
+                #si tengo permisos para ver pedidos
+                if usuario.has_perm('distribuidora_app.view_pedidomodel'):
+                    pedidos_proveedor = PedidoModel.objects.filter(state=True,cuenta=proveedor).order_by('-id')
+                    context['pedidos_proveedor']=pedidos_proveedor
+
                 if  usuario.has_perm('distribuidora_app.change_cuentamodel'):
                     form_editable= ProveedorForm(instance=proveedor)            
                     context['form']= form_editable
@@ -139,7 +149,7 @@ class ProveedorDetalleView(View):
             else:
                 return redirect('no_autorizado')
         else:
-            redirect('landing_home')
+            return redirect('landing_home')
     
 
     def post(self,request,pk,*args,**kwargs):
@@ -355,7 +365,7 @@ class PedidosView(View):
                 #======================== IMPORTANTE FALTA RESPUESTAS PARA CLIENTES =================
 class PedidoCreateView(View):
     
-    def get (self,request,*args,**kwargs):
+    def get (self,request,pk=None,*args,**kwargs):
         HAS_ACCESS=False   
         usuario = self.request.user
         context={}
@@ -365,8 +375,13 @@ class PedidoCreateView(View):
             if usuario.has_perms(['distribuidora_app.add_pedidomodel','distribuidora_app.view_pedidomodel']):
 
                 if usuario.is_staff:#si es empleado
-                    proveedoresList= CuentaModel.objects.filter(state=True)#envio listado de proveedores para seleccionar
-                    context['proveedoresList']=proveedoresList
+                    if pk != None:
+                        proveedor= CuentaModel.objects.get(id=pk)
+                        productosList=ProductoModel.objects.filter(state=True,proveedor=proveedor)
+                        context['productoList']=productosList
+                    else:
+                        proveedoresList= CuentaModel.objects.filter(state=True)#envio listado de proveedores para seleccionar
+                        context['proveedoresList']=proveedoresList
                 elif usuario.perfil.is_cliente:#valido sea cliente, proveedores NO hacen pedidos
                     # ================= ATENCION =======================0
                     #Acá debo buscar los productos que tengo en stock, NO desde la tabla productos
@@ -431,40 +446,47 @@ class PedidosJsonView(View):
                     jsonData = json.loads(request.body)
                     metarCode = jsonData.get('Metar') 
                     almacen= jsonData.get('almacen')
-
-                   
-                    if pk != None:
-                        try:
-                            error= False
-                            #busco proveedor al que se le hace el pedido
+            
+                    #if pk != None:
+                    try:
+                        error= False
+                        #busco proveedor al que se le hace el pedido
+                        if pk != None:
                             proveedor_pedido = CuentaModel.objects.get(state=True,id= pk)
                             #Creo el pedido
                             nuevo_pedido = PedidoModel.objects.create(estado='SOLICITADO',cuenta=proveedor_pedido,usuario=usuario,tipo_pedido='COMPRA')
-                    
-                            for pedido in metarCode:
+                        else:# entro si vengo de crear el producto desde la ventana de proveedores
+                            #busco el producto un producto, para obtener el proveedor
+                            producto_proveedor=ProductoModel.objects.get(state=True,id= metarCode[0]['id'])
+                            #creo pedido
+                            nuevo_pedido = PedidoModel.objects.create(estado='SOLICITADO',cuenta=producto_proveedor.proveedor,usuario=usuario,tipo_pedido='COMPRA')
+                        
+                        for pedido in metarCode:
 
-                                id_pedido = pedido['id']
-                                cantidad_pedido = pedido['cantidad']
-                                costo_pedido =pedido['costo']
+                            id_pedido = pedido['id']
+                            cantidad_pedido = pedido['cantidad']
+                            costo_pedido =pedido['costo']
 
-                                #traigo producto
+                            #traigo producto
 
-                                producto_pedido = ProductoModel.objects.get(state=True, id=id_pedido)
-                                #creo el detalle    
-                                detalle_pedido= PedidoDetalleModel.objects.create(pedido=nuevo_pedido,cantidad=cantidad_pedido,producto=producto_pedido)
+                            producto_pedido = ProductoModel.objects.get(state=True, id=id_pedido)
+                            #creo el detalle    
+                            detalle_pedido= PedidoDetalleModel.objects.create(pedido=nuevo_pedido,cantidad=cantidad_pedido,producto=producto_pedido)
+                        
+                        #armo el contexto para la respuesta
+
+                        detalle_pedido=PedidoDetalleModel.objects.filter(state=True,pedido=nuevo_pedido)
+
+                        list_producto_detalle=[]
+
+                        for producto in detalle_pedido:
                             
-                            #armo el contexto para la respuesta
+                            list_producto_detalle.append(producto.json())
+                            
+                    except:
+                        error= True
+                    
 
-                            detalle_pedido=PedidoDetalleModel.objects.filter(state=True,pedido=nuevo_pedido)
-
-                            list_producto_detalle=[]
-
-                            for producto in detalle_pedido:
-                                
-                                list_producto_detalle.append(producto.json())
-                                
-                        except:
-                            error= True
 
 
                     context={

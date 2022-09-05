@@ -1,3 +1,4 @@
+from typing import List
 from django.contrib import admin
 from django.urls import path
 
@@ -23,6 +24,7 @@ urlpatterns = [
     path('pedidos/',PedidosView.as_view(),name='pedidos'),
     path('pedidos/<int:pk>',PedidoDetalleView.as_view(),name='pedidos_detalle'),
     path('pedidos_create/',PedidoCreateView.as_view(),name='pedido_create'),
+    path('pedidos_create/<int:pk>',PedidoCreateView.as_view(),name='pedido_create_pk'),
     path('pedidos_proveedor/',PedidosJsonView.as_view(),name='pedidos_rest_sipk'),
     path('pedidos_proveedor/<int:pk>',PedidosJsonView.as_view(),name='pedidos_rest'),
     #path('cambio_estado_pedido/<estado>/<int:pk>',cambio_estado_pedido,name='cambio_estado_pedido'),
@@ -31,3 +33,7 @@ urlpatterns = [
 
     path('prohibido/',prohibido,name='no_autorizado')
 ]
+
+
+
+
