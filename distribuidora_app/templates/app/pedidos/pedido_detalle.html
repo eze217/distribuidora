@@ -27,6 +27,7 @@
         <div class="col-4 " >
             
             <h5 id="datos_pedidos">Estado del pedido = {{pedido.estado}}</h5>
+            
             {%if form_pedido%}
             <form action="" method="post">{%csrf_token%}
             <h5 id="datos_pedidos_form" class="oculto" >Estado del pedido = {{form_pedido.estado}}
@@ -43,10 +44,19 @@
                       </svg>
                 </a>  
             
-            </h5>
-          
-            
+            </h5>            
             {%endif%}
+
+            <h5 id="datos_pedidos">Datos de Entrega ={{pedido.datos_entrega|upper}}
+                {% if perms.distribuidora_app.view_entregamodel %}
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#datosentrega" id="confirmo_cambio">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                    <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                  </svg>
+            </button>
+                {%endif%}
+            </h5>
             <h5>Movimiento generado = {{pedido.tipo_pedido}}</h5>
               
         </div>
@@ -122,6 +132,41 @@
 <a href="{%url 'pedidos'%}" class="btn btn-secondary oculto" id="botonlistapedidos">Lista de pedidos</a>
 
 </div>
+
+{% if perms.distribuidora_app.view_entregamodel %}
+
+  <!-- Vista datos entrega -->
+  <div class="modal fade" id="datosentrega" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Datos de entrega</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+            <div class="modal-body">
+                {%if datos_entrega%}
+                    <h5>{{datos_entrega.name}}</h5>
+                    <h5>{{datos_entrega.address}}</h5>
+
+                {%endif%}
+                    
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancela</button>
+               
+                
+            </div>
+       
+      </div>
+    </div>
+  </div>
+  {%endif%}
+
+
+
+
+
 {%endif%}
 
 

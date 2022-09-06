@@ -1,4 +1,5 @@
 
+
 from django.db import models
 
 from django.conf import settings
@@ -22,18 +23,6 @@ class BasicModel(models.Model):
         verbose_name='Modelo Base'
         verbose_name_plural='Modelos Base'
 
-class AlmacenModel( BasicModel):
-    name= models.CharField(verbose_name='Nombre',max_length=100,blank=False,null=False)
-    address= models.CharField(verbose_name='Domicilio',max_length=200,blank=False,null=False)
-    phone=models.CharField(verbose_name='Telefono',max_length=15,blank=False,null=False)
-
-    class Meta:
-        verbose_name='Almacen'
-        verbose_name_plural='Almacenes'
-    
-    def __str__(self):
-        return self.name
-
 
 class CuentaModel(BasicModel):
     name= models.CharField(verbose_name='Nombre',max_length=100,blank=False,null=False)
@@ -48,6 +37,23 @@ class CuentaModel(BasicModel):
     
     def __str__(self):
         return self.name
+
+
+class EntregaModel( BasicModel):
+    name= models.CharField(verbose_name='Nombre',max_length=100,blank=False,null=False)
+    address= models.CharField(verbose_name='Domicilio',max_length=200,blank=False,null=False)
+    phone=models.CharField(verbose_name='Telefono',max_length=15,blank=False,null=False)
+    cuenta=models.ForeignKey(CuentaModel,on_delete=models.CASCADE,blank=True,null=True)
+
+    class Meta:
+        verbose_name='Datos de entrega'
+        verbose_name_plural='Datos de entrega'
+    
+    def __str__(self):
+        return self.name
+
+
+
 
     
 class ProductoModel(BasicModel):
@@ -82,6 +88,7 @@ class AlmacenStockModel(BasicModel):
         ('EGRESO', 'EGRESO')
         )
     movimiento=models.CharField(verbose_name='Movimiento',choices=TYPE_CHOICES,max_length=10)
+    almacen = models.ForeignKey(EntregaModel,on_delete=models.CASCADE,null=True,blank=True)
     
     
     class Meta:
@@ -109,7 +116,8 @@ class PedidoModel (BasicModel):
     usuario = models.ForeignKey(User,on_delete=models.CASCADE)
     TYPE_PEDIDO=(('COMPRA','COMPRA'),('VENTA','VENTA'))
     tipo_pedido= models.CharField(verbose_name='Tipo de pedido',choices=TYPE_PEDIDO,max_length=10)
-
+    datos_entrega = models.ForeignKey(EntregaModel, on_delete=models.CASCADE,null=True,blank=True)
+    
     class Meta:
         verbose_name='Pedido'
         verbose_name_plural= 'Pedidos'
@@ -123,7 +131,8 @@ class PedidoModel (BasicModel):
             'estado':self.estado,
             'proveedor':self.cuenta.name,
             'usuario':self.usuario.username,
-            'tipo_pedido':self.tipo_pedido
+            'tipo_pedido':self.tipo_pedido,
+            'datos_entrega':'Entregar en {}, domicilio {}, telefono de contacto {}.'.format(self.datos_entrega.name, self.datos_entrega.address,self.datos_entrega.phone)
 
         }
         return data
@@ -159,3 +168,26 @@ class PedidoDetalleModel (BasicModel):
 
     
 
+class ProductoEnVenta(BasicModel):
+    producto= models.ForeignKey(ProductoModel,on_delete=models.CASCADE)
+    porcentaje_venta = models.FloatField()
+
+    def costoRemarcado(self):
+        nuevo_precio = self.producto.precio + ((self.producto.precio * self.porcentaje_venta)/100 )
+
+        return nuevo_precio
+    
+    def __str__(self):
+        return str(self.porcentaje_venta)
+
+class Descuento(BasicModel):
+    producto= models.ForeignKey(ProductoEnVenta,on_delete=models.CASCADE)
+    porcentaje_descuento = models.FloatField()
+
+    def costoConDescuento(self):
+        precio_venta = self.producto.costoRemarcado()
+        nuevo_precio = precio_venta - ((precio_venta * self.porcentaje_venta)/100 )
+        return nuevo_precio
+    
+    def __str__(self):
+        return str(self.porcentaje_descuento)

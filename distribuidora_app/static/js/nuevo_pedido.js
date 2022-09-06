@@ -223,7 +223,7 @@ function confirmo_pedido(){
          url ='/pedidos_proveedor/'
     }
 
-
+    let almacen = document.getElementById('entrega').value
     
     list_proveedores=  fetch(url, {
         method: 'POST',
@@ -233,7 +233,7 @@ function confirmo_pedido(){
         "Accept": "application/json",
         'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 'Metar': producto_a_comprar, 'almacen': 1 }),
+        body: JSON.stringify({ 'Metar': producto_a_comprar, 'almacen': almacen }),
 
 
     }).then(res => res.json())
@@ -264,6 +264,13 @@ function confirmo_pedido(){
             let h4_datos_proveedor= document.createElement('h4')
             h4_datos_proveedor.innerHTML= 'Pedido realizado al proveedor: '+json.data.pedido[0].proveedor
             contenedor_detalle_datos.appendChild(h4_datos_proveedor)
+
+
+            //Entrega
+            let h4_datos_entrega= document.createElement('h4')
+            h4_datos_entrega.innerHTML= 'Datos de entrega: '+json.data.pedido[0].datos_entrega
+            contenedor_detalle_datos.appendChild(h4_datos_entrega)
+
 
 
             //estado

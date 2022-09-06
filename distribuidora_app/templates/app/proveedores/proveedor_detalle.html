@@ -24,8 +24,21 @@
                     <div class="col-3">CIF: {{proveedor.nro_identificacion}}</div>
                     <div class="col-3">Telefono: {{proveedor.telefono}}</div>
                     <div class="col-3">Domicilio: {{proveedor.domicilio}}</div> 
-                    <div class="col-3">Notas: {{proveedor.observaciones}}</div>       
+                    <div class="col-3">Notas: {{proveedor.observaciones}}</div>   
+                    <div class="col-3">Usuarios: 
+                        {%if usuarios%}
+                        {%for usuario in usuarios%}
+                        <li>{{usuario.usuario}}</li>
+                        {%endfor%}
+                        {%endif%}
+                    </div>   
             </div>
+          
+
+                
+                
+      
+        
             <div class="botones position-absolute fixed-bottom ">   
                 {%if form%}
                 <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">

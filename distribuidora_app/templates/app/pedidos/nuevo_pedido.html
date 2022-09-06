@@ -88,6 +88,23 @@
 <h5 >Total del Pedido:</h5>
 <h6 id="total_general">0 €</h6>
 
+<div class="col-4 entrega">
+    {%if entrega %}
+    <h5>Selecciona domicilio de entrega:</h5>
+    
+        
+        <select name="" id="entrega" >
+            
+            {%for domicilio in entrega%}
+            
+                <option value="{{domicilio.id}}" >{{domicilio.name|upper}} | <p>{{domicilio.address}}</p></option>
+            {% endfor %}
+            
+        </select>
+    {%endif%}
+    </div>
+
+
 <button class="btn btn-success oculto" id="boton_confirmar_pedido" onclick="confirmo_pedido()">Confirmar</button>
 
 </div>

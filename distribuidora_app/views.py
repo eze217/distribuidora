@@ -6,7 +6,7 @@ from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm
 from distribuidora_app.forms import PedidoDetalleCreateForm,PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 
-from distribuidora_app.models import PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel
+from distribuidora_app.models import PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel,EntregaModel
 
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
@@ -130,11 +130,14 @@ class ProveedorDetalleView(View):
         usuario=self.request.user
         
         if usuario.is_authenticated and usuario.is_active:
-            print(usuario)
+            
             if  usuario.is_staff and usuario.has_perm('distribuidora_app.view_cuentamodel'):
                 
+                usuarios_cuenta=Perfil.objects.filter( cuenta=proveedor)
+
                 context['HAS_ACCESS']= True
                 context['proveedor']= proveedor
+                context['usuarios']= usuarios_cuenta
 
                 #si tengo permisos para ver pedidos
                 if usuario.has_perm('distribuidora_app.view_pedidomodel'):
@@ -382,6 +385,10 @@ class PedidoCreateView(View):
                     else:
                         proveedoresList= CuentaModel.objects.filter(state=True)#envio listado de proveedores para seleccionar
                         context['proveedoresList']=proveedoresList
+                    #busco mis almacenes
+                    entrega=EntregaModel.objects.filter(state=True,cuenta=usuario.perfil.cuenta)
+                    context['entrega']=entrega
+
                 elif usuario.perfil.is_cliente:#valido sea cliente, proveedores NO hacen pedidos
                     # ================= ATENCION =======================0
                     #Acá debo buscar los productos que tengo en stock, NO desde la tabla productos
@@ -446,7 +453,7 @@ class PedidosJsonView(View):
                     jsonData = json.loads(request.body)
                     metarCode = jsonData.get('Metar') 
                     almacen= jsonData.get('almacen')
-            
+                    almacen=EntregaModel.objects.get(id=almacen)
                     #if pk != None:
                     try:
                         error= False
@@ -454,12 +461,12 @@ class PedidosJsonView(View):
                         if pk != None:
                             proveedor_pedido = CuentaModel.objects.get(state=True,id= pk)
                             #Creo el pedido
-                            nuevo_pedido = PedidoModel.objects.create(estado='SOLICITADO',cuenta=proveedor_pedido,usuario=usuario,tipo_pedido='COMPRA')
+                            nuevo_pedido = PedidoModel.objects.create(estado='SOLICITADO',cuenta=proveedor_pedido,usuario=usuario,tipo_pedido='COMPRA',datos_entrega=almacen)
                         else:# entro si vengo de crear el producto desde la ventana de proveedores
                             #busco el producto un producto, para obtener el proveedor
                             producto_proveedor=ProductoModel.objects.get(state=True,id= metarCode[0]['id'])
                             #creo pedido
-                            nuevo_pedido = PedidoModel.objects.create(estado='SOLICITADO',cuenta=producto_proveedor.proveedor,usuario=usuario,tipo_pedido='COMPRA')
+                            nuevo_pedido = PedidoModel.objects.create(estado='SOLICITADO',cuenta=producto_proveedor.proveedor,usuario=usuario,tipo_pedido='COMPRA',datos_entrega=almacen)
                         
                         for pedido in metarCode:
 
@@ -569,6 +576,12 @@ class PedidoDetalleView(View):
                         'form_pedido':form_pedido_seleccionado,
                         'form_detalle_pedido':lista_form_detalle
                     }
+
+                    if usuario.has_perm('distribuidora_app.view_entregamodel'):
+
+                        datos_entrega = EntregaModel.objects.get(id = pedidos_seleccionado.datos_entrega.id)
+                        context['datos_entrega'] =datos_entrega
+
                 else:
                     context={}
                 
