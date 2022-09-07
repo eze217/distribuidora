@@ -21,6 +21,9 @@
                 <thead>
                     <tr>
                         <th>
+                            Fecha solicitado
+                        </th>
+                        <th>
                             Nro.Pedido
                         </th>
                         <th>
@@ -46,6 +49,10 @@
                     {%if pedidos_list%}
                         {%for pedido in pedidos_list%}
                     <tr>
+                        <td>
+                            {{pedido.created_date|date:"d/m/Y"}}
+                            
+                        </td>
                         <td>
                             {{pedido.id}}
                         </td>

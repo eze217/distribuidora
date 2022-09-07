@@ -84,7 +84,18 @@ class ProveedoresView(View):
                 form=ProveedorForm()
 
 
-                proveedoresList= CuentaModel.objects.filter(state=True).all()
+                #proveedoresList= CuentaModel.objects.filter(state=True).all()
+  
+                #buscar los proveedores que son solo proveedores
+                proveedoresPerfil=Perfil.objects.filter(is_proveedor=True).all()
+                
+                proveedoresList=[]
+                for pp in proveedoresPerfil:
+                    if pp.is_proveedor:
+                        
+                        proveedoresList.append(pp.cuenta)
+               
+
 
                 
 
@@ -112,7 +123,7 @@ class ProveedoresView(View):
 
             if formulario.is_valid():
                 
-                nuevo_proveedor= CuentaModel.objects.create(name=formulario.cleaned_data['name'],domicilio=formulario.cleaned_data['domicilio'],telefono=formulario.cleaned_data['telefono'],cif=formulario.cleaned_data['cif'])
+                nuevo_proveedor= CuentaModel.objects.create(name=formulario.cleaned_data['name'],domicilio=formulario.cleaned_data['domicilio'],telefono=formulario.cleaned_data['telefono'],nro_identificacion=formulario.cleaned_data['nro_identificacion'])
                 nuevo_proveedor.save()
 
             return redirect('proveedores' )
@@ -264,9 +275,12 @@ class ProductosView(View):
 
                     if form_Producto.is_valid():
                         try:#si es proveedor
-                            producto_editable= form_Producto.save(commit=False)
-                            producto_editable.proveedor = usuario.perfil.cuenta
-                            producto_editable= form_Producto.save()
+                            if usuario.perfil.is_proveedor:
+                                producto_editable= form_Producto.save(commit=False)
+                                producto_editable.proveedor = usuario.perfil.cuenta
+                                producto_editable= form_Producto.save()
+                            else:
+                                producto_editable= form_Producto.save()    
                         except:
 
                             producto_editable= form_Producto.save()
@@ -278,16 +292,21 @@ class ProductosView(View):
                         if usuario.perfil.is_proveedor:
                             
                             form_Producto=ProductoForm(request.POST)
-                          
+                        else:
+                            form_Producto=ProductoAdminForm(request.POST)
+                            
                     except:
                         form_Producto=ProductoAdminForm(request.POST)
                 
                     if form_Producto.is_valid():
                         producto= ProductoModel()
                         try:#si es proveedor
-                            producto = form_Producto.save(commit=False)
-                            producto.proveedor= usuario.perfil.cuenta
-                            producto = form_Producto.save()
+                            if usuario.perfil.is_proveedor:
+                                producto = form_Producto.save(commit=False)
+                                producto.proveedor= usuario.perfil.cuenta
+                                producto = form_Producto.save()
+                            else: 
+                                producto = form_Producto.save()
                             
                         except:
 
@@ -348,7 +367,7 @@ class PedidosView(View):
                 else :
                     if usuario.perfil.is_proveedor: 
                         #proveedor= Perfil.objects.get(usuario=user)
-                        pedidos_list=PedidoModel.objects.filter(state=True,proveedor=usuario.perfil.cuenta).order_by('-id')
+                        pedidos_list=PedidoModel.objects.filter(state=True,cuenta=usuario.perfil.cuenta).order_by('-id')
                     elif usuario.perfil.is_cliente:
                         pedidos_list=PedidoModel.objects.filter(state=True,usuario=usuario).order_by('-id')
                 
@@ -383,7 +402,15 @@ class PedidoCreateView(View):
                         productosList=ProductoModel.objects.filter(state=True,proveedor=proveedor)
                         context['productoList']=productosList
                     else:
-                        proveedoresList= CuentaModel.objects.filter(state=True)#envio listado de proveedores para seleccionar
+                        proveedoresPerfil=Perfil.objects.filter(is_proveedor=True).all()
+                        #genero listado de proveedores 
+                        proveedoresList=[]
+                        for pp in proveedoresPerfil:
+                            if pp.is_proveedor:
+                                proveedoresList.append(pp.cuenta)
+               
+
+                        #proveedoresList= CuentaModel.objects.filter(state=True)#envio listado de proveedores para seleccionar
                         context['proveedoresList']=proveedoresList
                     #busco mis almacenes
                     entrega=EntregaModel.objects.filter(state=True,cuenta=usuario.perfil.cuenta)
