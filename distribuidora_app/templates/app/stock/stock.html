@@ -4,6 +4,7 @@
 {%block css%}
 
 <link href="{% static 'css/proveedores.css' %}" rel="stylesheet" type="text/css" >
+<link href="{% static 'css/stock.css' %}" rel="stylesheet" type="text/css" >
 
 {%endblock%}
 
@@ -16,6 +17,47 @@
 <div class="container  ">
     <div class="row ">
         <h5>Control Stock:</h5>
+        <!-- traigo almacenes-->
+
+        <p>Almacen: <a href="{%url 'stock'%}" class="{% if request.path == '/stock/' %} resaltado {% endif %}">Todos</a>{%for almacen in almacenList%} / <a href="{%url 'stock_almacen' almacen.id%}" class="{% if request.path == '/stock/{{almacen.id}}' %} resaltado {% endif %}">{{almacen.name}}</a> {%endfor%}</p>
+
+        <h6>Detalle Simplificado por producto:</h6>
+
+        <div class="col col-12 tabla_proveedores ">
+            <table class="table table-striped ">
+                <thead>
+                    <tr>
+                        <th>
+                            Producto
+                        </th>
+                        <th>
+                            Cantidad total en stock
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {%if totales_producto%}
+                        {%for producto in totales_producto%}
+                    <tr>
+                        <td>
+                            {{producto.producto}}
+                        </td>
+                        <td>
+                            {{producto.cantidad}}
+                        </td>
+            
+                    </tr>
+                        {%endfor%}
+                    {%endif%}
+                </tbody>
+              </table>
+
+        </div>
+
+
+        <!-- Detalle diarios-->
+        <h6>Detalle diario:</h6>
         <div class="col col-12 tabla_proveedores ">
             <table class="table table-striped ">
                 <thead>
@@ -33,34 +75,28 @@
                             Movimiento Generado
                         </th>
                         <th>
-                            
+                            Fecha Movimiento
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    {%if proveedores_list%}
-                        {%for proveedor in proveedores_list%}
+                    {%if list_stock%}
+                        {%for movimiento in list_stock%}
                     <tr>
                         <td>
-                            {{proveedor.name}}
+                            {{movimiento.cantidad}}
                         </td>
                         <td>
-                            {{proveedor.telefono}}
+                            {{movimiento.producto}}
                         </td>
                         <td>
-                            {{proveedor.domicilio}}
+                            {{movimiento.nro_pedido}}
                         </td>
                         <td>
-                            {{proveedor.nro_identificacion}}
+                            {{movimiento.movimiento}}
                         </td>
                         <td>
-                            <a href="{%url 'proveedor_detalle' proveedor.id%}">
-
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye ver" viewBox="0 0 16 16">
-                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-                                </svg>
-                            </a>
+                            {{movimiento.created_date|date:"d/m/Y"}}
                         </td>
                     </tr>
                         {%endfor%}

@@ -3,20 +3,18 @@ from multiprocessing import context
 from django.shortcuts import render,redirect
 from django.views import View
 from django.http.response import JsonResponse
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import user_passes_test
+
 from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm,ProductoEditForm
 from distribuidora_app.forms import PedidoDetalleCreateForm,PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 
 from distribuidora_app.models import AlmacenStockModel, PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel,EntregaModel
-
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import user_passes_test
-
+from distribuidora_app.utils import cantidadPorProducto
 
 
 import json
-from django.core.serializers.json import DjangoJSONEncoder
-
 from user.models import Perfil
 
 
@@ -671,12 +669,31 @@ class PedidoDetalleView(View):
 
 
 class StockView (View):
-    def get (self,request,*args,**kwargs):
+    def get (self,request,pk=None,*args,**kwargs):
         HAS_ACCESS=False
         usuario = self.request.user
         
         if usuario.is_authenticated and usuario.is_active:
-            if usuario.has_perm('distribuidora_app.view_almacenstockmodel'):
+            if usuario.has_perm('distribuidora_app.view_almacenstockmodel') and usuario.is_staff:
                 HAS_ACCESS= True
-                context={'HAS_ACCESS':HAS_ACCESS}
+                #traigo los almacenes
+                almacenes=EntregaModel.objects.filter(state=True,cuenta=usuario.perfil.cuenta)
+
+                if pk!=None:
+                    almacen_seleccionado=EntregaModel.objects.get(id=pk)
+                    stock_completo= AlmacenStockModel.objects.filter(state=True,almacen=almacen_seleccionado).all().order_by('-id')
+                    totales_producto = cantidadPorProducto(almacen_seleccionado)
+                else:    
+                    stock_completo= AlmacenStockModel.objects.filter(state=True).all().order_by('-id')
+                    totales_producto = cantidadPorProducto()
+                
+                
+                context={
+                    'HAS_ACCESS':HAS_ACCESS,
+                    'list_stock':stock_completo,
+                    'almacenList':almacenes,
+                    'totales_producto':totales_producto
+                    }
+
+
                 return render(request,'app/stock/stock.html',context)

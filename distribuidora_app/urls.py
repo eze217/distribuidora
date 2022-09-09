@@ -30,6 +30,7 @@ urlpatterns = [
     #path('cambio_estado_pedido/<estado>/<int:pk>',cambio_estado_pedido,name='cambio_estado_pedido'),
     
     path('stock/',StockView.as_view(),name='stock'),
+    path('stock/<int:pk>',StockView.as_view(),name='stock_almacen'),
 
     path('prohibido/',prohibido,name='no_autorizado')
 ]
