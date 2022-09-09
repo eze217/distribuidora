@@ -24,9 +24,9 @@
               
               <!-- Opciones solo para empresa-->
               {% if request.user.is_staff %}
-              {% if perms.distribuidora_app.view_almacenmodel %}
+              {% if perms.distribuidora_app.view_almacenstockmodel %}
               <li class="nav-item">
-                <a class="nav-link" href="#">Stock</a>
+                <a class="nav-link {% if request.path == '/stock/' %} active {% endif %} " href="{%url 'stock'%}">Stock</a>
               </li>
               {%endif%}
               {% if perms.distribuidora_app.view_cuentamodel %}

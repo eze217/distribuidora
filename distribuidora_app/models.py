@@ -80,24 +80,6 @@ class ProductoModel(BasicModel):
         }
         return data
     
-class AlmacenStockModel(BasicModel):
-    cantidad=models.IntegerField()
-    producto= models.ForeignKey(ProductoModel, on_delete=models.CASCADE)
-    TYPE_CHOICES = (
-        ('INGRESO', 'INGRESO'),
-        ('EGRESO', 'EGRESO')
-        )
-    movimiento=models.CharField(verbose_name='Movimiento',choices=TYPE_CHOICES,max_length=10)
-    almacen = models.ForeignKey(EntregaModel,on_delete=models.CASCADE,null=True,blank=True)
-    
-    
-    class Meta:
-        verbose_name= 'Almacen Stock'
-        verbose_name_plural='Almacen Stock'
-    
-    def __str__(self):
-        return self.cantidad,self.producto,self.movimiento
-
 
 
 
@@ -137,6 +119,24 @@ class PedidoModel (BasicModel):
         }
         return data
     
+class AlmacenStockModel(BasicModel):
+    cantidad=models.IntegerField()
+    producto= models.ForeignKey(ProductoModel, on_delete=models.CASCADE)
+    TYPE_CHOICES = (
+        ('INGRESO', 'INGRESO'),
+        ('EGRESO', 'EGRESO')
+        )
+    movimiento=models.CharField(verbose_name='Movimiento',choices=TYPE_CHOICES,max_length=10)
+    almacen = models.ForeignKey(EntregaModel,on_delete=models.CASCADE,null=True,blank=True)
+    nro_pedido=models.ForeignKey(PedidoModel,on_delete=models.CASCADE,null=True,blank=True)
+    
+    class Meta:
+        verbose_name= 'Almacen Stock'
+        verbose_name_plural='Almacen Stock'
+    
+    def __str__(self):
+        return '{} , {}, {}'.format(self.cantidad,self.producto,self.movimiento)
+
 
 class PedidoDetalleModel (BasicModel):
     

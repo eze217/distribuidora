@@ -7,7 +7,7 @@ from .views import ProductosView,productoEliminaView
 
 
 
-from .views import PedidosView,PedidoCreateView,PedidosJsonView,PedidoDetalleView
+from .views import PedidosView,PedidoCreateView,PedidosJsonView,PedidoDetalleView,StockView
 
 
 urlpatterns = [
@@ -29,7 +29,7 @@ urlpatterns = [
     path('pedidos_proveedor/<int:pk>',PedidosJsonView.as_view(),name='pedidos_rest'),
     #path('cambio_estado_pedido/<estado>/<int:pk>',cambio_estado_pedido,name='cambio_estado_pedido'),
     
-
+    path('stock/',StockView.as_view(),name='stock'),
 
     path('prohibido/',prohibido,name='no_autorizado')
 ]

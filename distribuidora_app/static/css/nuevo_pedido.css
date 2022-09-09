@@ -14,3 +14,13 @@
     margin-top: 20px;
     margin-bottom: 20px
 }
+
+#botonVer{
+    background: none;
+    border: none;
+    
+}
+
+#botonVer:hover{
+    color:blue;
+}

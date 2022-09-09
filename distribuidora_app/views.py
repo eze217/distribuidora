@@ -1,4 +1,5 @@
 
+from multiprocessing import context
 from django.shortcuts import render,redirect
 from django.views import View
 from django.http.response import JsonResponse
@@ -6,7 +7,7 @@ from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm
 from distribuidora_app.forms import PedidoDetalleCreateForm,PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 
-from distribuidora_app.models import PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel,EntregaModel
+from distribuidora_app.models import AlmacenStockModel, PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel,EntregaModel
 
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
@@ -627,12 +628,31 @@ class PedidoDetalleView(View):
             if  usuario.is_staff and usuario.has_perm('distribuidora_app.change_pedidomodel') or usuario.perfil.is_proveedor:
              
                 pedido= PedidoModel.objects.get(id=pk)
-                
+                estado_actual=pedido.estado
                 form_pedido=PedidoEdicionForm(request.POST,instance=pedido)
                 
-                if form_pedido.is_valid():
-                    pedido = form_pedido.save()
                 
+                if form_pedido.is_valid():
+                    
+                    pedido_mod = form_pedido.save(commit=False)
+                    
+
+                    if pedido_mod.estado =="ENTREGADO":
+                        
+                        #Si esta entregado debo hacer un cambio agregarlo en el stock del almacen.
+                        detalle_pedido = PedidoDetalleModel.objects.filter(pedido=pedido).all()
+                        for stock in detalle_pedido:
+                            agrego_stock= AlmacenStockModel.objects.create(cantidad=stock.cantidad,producto=stock.producto,movimiento='INGRESO',almacen=pedido_mod.datos_entrega,nro_pedido=pedido_mod)#movimiento ingreso porque agrega a stock
+                   #verifico si el estado actual es entregado y lo estoy cambiando, para eliminar el stock
+                    elif estado_actual == 'ENTREGADO' and pedido_mod.estado !="ENTREGADO":
+                        #busco stock y elimino
+                        stock_previo= AlmacenStockModel.objects.filter(nro_pedido=pedido).all()
+                        stock_previo.delete()
+
+
+
+                    #Luego de verificar el estado guardo el cambio
+                    pedido = form_pedido.save()
 
                 return redirect('pedidos_detalle',pk)
            
@@ -645,29 +665,18 @@ class PedidoDetalleView(View):
 
 
 
-'''
-def cambio_estado_pedido(request,estado,pk):
-    
-    if request.method == 'GET':
+
+
+# ============================================================== VISTAS STOCK ================================================================================
+
+
+class StockView (View):
+    def get (self,request,*args,**kwargs):
+        HAS_ACCESS=False
+        usuario = self.request.user
         
-        if request.user.is_authenticated and request.user.is_active:
-            
-            usuario= request.user
-            
-            if  usuario.is_staff and usuario.has_perm('distribuidora_app.change_pedidomodel'):
-             
-                nuevo_estado=estado      
-                pedido= PedidoModel.objects.get(id=pk)
-               
-                form_pedido=PedidoCreateForm(estado=nuevo_estado,instance=pedido)
-                print(form_pedido.is_valid())
-                if form_pedido.is_valid():
-                    print('ok')
-                    pedido= form_pedido.save(commit=False)
-                    pedido.estado=nuevo_estado
-                    pedido = form_pedido.save()
-
-                    return JsonResponse({'ok':True})
-    
-    return JsonResponse({'ok':True})'''
-
+        if usuario.is_authenticated and usuario.is_active:
+            if usuario.has_perm('distribuidora_app.view_almacenstockmodel'):
+                HAS_ACCESS= True
+                context={'HAS_ACCESS':HAS_ACCESS}
+                return render(request,'app/stock/stock.html',context)
