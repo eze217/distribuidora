@@ -1,5 +1,5 @@
 from django.db.models import Sum
-from distribuidora_app.models import AlmacenStockModel, EntregaModel, ProductoEnVenta,ProductoModel
+from distribuidora_app.models import AlmacenStockModel, EntregaModel, ProductoEnVenta,ProductoModel,ProductoAlmacenado
 
 
 
@@ -67,24 +67,28 @@ def verificoCantidad_EnVenta(lista_prodVta=None):
 
 
 def ProductosNOenVenta():
-
+    #traigo los productos en venta
     productosEnVenta= verificoCantidad_EnVenta()
+    #traigo el stock completo (ingreso-egreso)
+    stock_general= cantidadPorProducto()
 
-    stock= cantidadPorProducto()
-    list_prod_venta=[]
-    for producto in stock:
+    #lista para almacenar los productos
+    list_prod_almacenados=[]
+
+
+    for producto in stock_general:
+        #del stock veo cuales esta en venta
+      
+        cantidad_almacenada = producto['cantidad']
         for enVta in productosEnVenta:
+            #si esta a la venta
+     
+            
             if producto['producto'] == enVta.producto :
-                if producto['cantidad'] >= enVta.cantidad_venta:
-                    #crear tabla par aguardar los pendientes de venta tabla igual a la otra
-                    list_prod_venta.append(enVta)
-                elif producto['cantidad'] <= enVta.cantidad_venta and producto['cantidad']>0:
-                    enVta.cantidad_venta = producto['cantidad']
-                    enVta.save()
-                    list_prod_venta.append(enVta)
+                cantidad_almacenada = producto['cantidad'] - enVta.cantidad_venta
+        if cantidad_almacenada >0:
+            list_prod_almacenados.append(ProductoAlmacenado.objects.get_or_create(producto=producto['producto'],cantidad=cantidad_almacenada))
 
-                
-    
-    return list_prod_venta
+    return list_prod_almacenados
 
 

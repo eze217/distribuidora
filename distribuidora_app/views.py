@@ -12,7 +12,7 @@ from distribuidora_app.forms import PedidoDetalleCreateForm,PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 
 from distribuidora_app.models import AlmacenStockModel, PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel,EntregaModel,ProductoEnVenta
-from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVenta
+from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVenta,ProductosNOenVenta
 
 
 import json
@@ -719,11 +719,13 @@ class ProductosVentaView(View):
                 #productos_en_venta = 
 
                 productos_en_venta=verificoCantidad_EnVenta(ProductoEnVenta.objects.filter(state=True).all())
-
+                productos_en_almacenados=ProductosNOenVenta()
+                print(productos_en_almacenados)
 
                 context={
                         'HAS_ACCESS':HAS_ACCESS,
                         'productos_en_venta':productos_en_venta,
+                        'productos_en_almacenados':productos_en_almacenados
             
                         }
 

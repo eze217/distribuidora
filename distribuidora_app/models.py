@@ -186,6 +186,17 @@ class ProductoEnVenta(BasicModel):
     def __str__(self):
         return str(self.porcentaje_venta)
 
+class ProductoAlmacenado(BasicModel):
+    producto= models.ForeignKey(ProductoModel,on_delete=models.CASCADE)
+    cantidad= models.IntegerField(verbose_name='Cantidad en venta',default=0)
+
+    class Meta:
+        verbose_name='Producto Almacenado'
+
+
+    def __str__(self):
+        return str(self.producto)
+
 
 
 

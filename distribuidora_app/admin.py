@@ -12,6 +12,7 @@ admin.site.register(EntregaModel)
 admin.site.register(AlmacenStockModel)
 admin.site.register(ProductoEnVenta)
 admin.site.register(Descuento)
+admin.site.register(ProductoAlmacenado)
 
 
 

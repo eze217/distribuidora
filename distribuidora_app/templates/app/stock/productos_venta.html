@@ -70,40 +70,40 @@
                 <thead>
                     <tr>
                         <th>
-                            Cantidad
-                        </th>
-                        <th>
                             Producto
                         </th>
                         <th>
-                            Nro.Pedido
+                            Cantidad
                         </th>
                         <th>
-                            Movimiento Generado
+                            
                         </th>
                         <th>
-                            Fecha Movimiento
+                            
+                        </th>
+                        <th>
+                            
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    {%if list_stock%}
-                        {%for movimiento in list_stock%}
+                    {%if productos_en_almacenados%}
+                        {%for producto in productos_en_almacenados%}
                     <tr>
                         <td>
-                            {{movimiento.cantidad}}
+                            {{producto.0.producto}}
                         </td>
                         <td>
-                            {{movimiento.producto}}
+                            {{producto.0.cantidad}}
                         </td>
                         <td>
-                            {{movimiento.nro_pedido}}
+                         
                         </td>
                         <td>
-                            {{movimiento.movimiento}}
+                   
                         </td>
                         <td>
-                            {{movimiento.created_date|date:"d/m/Y"}}
+                      
                         </td>
                     </tr>
                         {%endfor%}
