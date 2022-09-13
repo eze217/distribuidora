@@ -166,21 +166,30 @@ class PedidoDetalleModel (BasicModel):
         }
         return data
 
-    
 
+# ver y restructutar estos modelos
 class ProductoEnVenta(BasicModel):
     producto= models.ForeignKey(ProductoModel,on_delete=models.CASCADE)
     porcentaje_venta = models.FloatField()
+    cantidad_venta= models.IntegerField(verbose_name='Cantidad en venta',default=0)
+
+    class Meta:
+        verbose_name='Producto en venta'
 
     def costoRemarcado(self):
         nuevo_precio = self.producto.precio + ((self.producto.precio * self.porcentaje_venta)/100 )
 
         return nuevo_precio
-    
+
+
+
     def __str__(self):
         return str(self.porcentaje_venta)
 
-class Descuento(BasicModel):
+
+
+
+class Descuento(BasicModel):# unir modelo con el de arriba
     producto= models.ForeignKey(ProductoEnVenta,on_delete=models.CASCADE)
     porcentaje_descuento = models.FloatField()
 

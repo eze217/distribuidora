@@ -2,3 +2,8 @@
     font-weight: bold;
     font-style: italic;
 }
+
+.boton-venta{
+    border: 1px solid black;
+    margin-bottom: 20px;
+}

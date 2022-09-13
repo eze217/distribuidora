@@ -1,5 +1,6 @@
 
 from multiprocessing import context
+from pickle import TRUE
 from django.shortcuts import render,redirect
 from django.views import View
 from django.http.response import JsonResponse
@@ -10,8 +11,8 @@ from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm
 from distribuidora_app.forms import PedidoDetalleCreateForm,PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 
-from distribuidora_app.models import AlmacenStockModel, PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel,EntregaModel
-from distribuidora_app.utils import cantidadPorProducto
+from distribuidora_app.models import AlmacenStockModel, PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel,EntregaModel,ProductoEnVenta
+from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVenta
 
 
 import json
@@ -697,3 +698,37 @@ class StockView (View):
 
 
                 return render(request,'app/stock/stock.html',context)
+            return redirect('no_autorizado')
+        return redirect('landing_home')
+
+
+# ============================================================== PRODUCTOS EN VENTA  ================================================================================
+
+class ProductosVentaView(View):
+    def get (self,request,pk=None,*args,**kwargs):
+        HAS_ACCESS=False
+        usuario = self.request.user
+        
+        if usuario.is_authenticated and usuario.is_active:
+            if usuario.has_perm('distribuidora_app.view_productoenventa') and usuario.is_staff:
+                HAS_ACCESS=True
+
+
+                #busco productos a la venta
+
+                #productos_en_venta = 
+
+                productos_en_venta=verificoCantidad_EnVenta(ProductoEnVenta.objects.filter(state=True).all())
+
+
+                context={
+                        'HAS_ACCESS':HAS_ACCESS,
+                        'productos_en_venta':productos_en_venta,
+            
+                        }
+
+                return render(request,'app/stock/productos_venta.html',context)
+             #sin permisos   
+            return redirect('no_autorizado')
+        #no logueado
+        return redirect('landing_home')

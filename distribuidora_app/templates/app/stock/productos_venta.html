@@ -16,20 +16,8 @@
 
 <div class="container  ">
     <div class="row ">
-        <h5>Control Stock:</h5>
-        <!-- traigo almacenes-->
-
-        <p>Almacen: <a href="{%url 'stock'%}" class="{% if request.path == '/stock/' %} resaltado {% endif %}">Todos</a>{%for almacen in almacenList%} / <a href="{%url 'stock_almacen' almacen.id%}" class="{% if request.path == '/stock/{{almacen.id}}' %} resaltado {% endif %}">{{almacen.name}}</a> {%endfor%}</p>
+        <h5>Productos puestos a la venta:</h5>
         
-        <div>
-            {% if perms.distribuidora_app.view_productoenventa %}
-            <a href="{%url 'productos_venta'%}" class="btn boton-venta"> Ver productos en venta</a>
-            {% endif %}
-        </div>
-
-
-        <h6>Detalle Simplificado por producto:</h6>
-
         <div class="col col-12 tabla_proveedores ">
             <table class="table table-striped ">
                 <thead>
@@ -38,20 +26,32 @@
                             Producto
                         </th>
                         <th>
-                            Cantidad total en stock
+                            Costo
+                        </th>
+                        <th>
+                            Precio Venta
+                        </th>
+                        <th>
+                            Cantidad en venta
                         </th>
 
                     </tr>
                 </thead>
                 <tbody>
-                    {%if totales_producto%}
-                        {%for producto in totales_producto%}
+                    {%if productos_en_venta %}
+                        {%for producto in productos_en_venta%}
                     <tr>
                         <td>
                             {{producto.producto}}
                         </td>
                         <td>
-                            {{producto.cantidad}}
+                            {{producto.producto.precio}}
+                        </td>
+                        <td>
+                            {{producto.costoRemarcado}}
+                        </td>
+                        <td>
+                            {{producto.cantidad_venta}}
                         </td>
             
                     </tr>
@@ -64,7 +64,7 @@
 
 
         <!-- Detalle diarios-->
-        <h6>Detalle diario:</h6>
+        <h6>Stock NO a la venta:</h6>
         <div class="col col-12 tabla_proveedores ">
             <table class="table table-striped ">
                 <thead>
@@ -115,40 +115,7 @@
         
     </div>
     
-    {%if form%}
-<!-- BOTON MODAL -->
-<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-    Nuevo  </button>
-    
 
-
-</div>
-
-      <!-- Modal CREACION PROVEEDOR -->
-      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Nuevo Proveedor</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="" method="post">{%csrf_token%}
-                <div class="modal-body">
-                        <table>
-                            {{form.as_table}}                   
-                        </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancela</button>
-                    <button type="submit"  class="btn btn-primary" value=""> Confirma </button>
-                    
-                </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    
-      {%endif%}
 
 {%endif%}
 
