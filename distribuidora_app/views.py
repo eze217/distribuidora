@@ -1,6 +1,4 @@
 
-from multiprocessing import context
-from pickle import TRUE
 from django.shortcuts import render,redirect
 from django.views import View
 from django.http.response import JsonResponse
@@ -408,18 +406,17 @@ class PedidoCreateView(View):
                         for pp in proveedoresPerfil:
                             if pp.is_proveedor:
                                 proveedoresList.append(pp.cuenta)
-               
-
-                        #proveedoresList= CuentaModel.objects.filter(state=True)#envio listado de proveedores para seleccionar
+   
                         context['proveedoresList']=proveedoresList
                     #busco mis almacenes
                     entrega=EntregaModel.objects.filter(state=True,cuenta=usuario.perfil.cuenta)
                     context['entrega']=entrega
 
                 elif usuario.perfil.is_cliente:#valido sea cliente, proveedores NO hacen pedidos
-                    # ================= ATENCION =======================0
-                    #Acá debo buscar los productos que tengo en stock, NO desde la tabla productos
-                    productosList=ProductoModel.objects.filter(state=True)
+                  
+                    productosList=ProductoEnVenta.objects.filter(state=True)
+
+                
                     context['productoList']=productosList
                 
                 context['HAS_ACCESS']=HAS_ACCESS
@@ -720,7 +717,7 @@ class ProductosVentaView(View):
 
                 productos_en_venta=verificoCantidad_EnVenta(ProductoEnVenta.objects.filter(state=True).all())
                 productos_en_almacenados=ProductosNOenVenta()
-                print(productos_en_almacenados)
+                
 
                 context={
                         'HAS_ACCESS':HAS_ACCESS,

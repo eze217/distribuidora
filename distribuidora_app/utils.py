@@ -84,8 +84,9 @@ def ProductosNOenVenta():
             #si esta a la venta
      
             
-            if producto['producto'] == enVta.producto :
-                cantidad_almacenada = producto['cantidad'] - enVta.cantidad_venta
+            if producto['producto'] == enVta.producto and enVta.state:# el estado me permite tener un producto en particular a la venta(por el costo diferenciado)
+                cantidad_almacenada -= enVta.cantidad_venta
+
         if cantidad_almacenada >0:
             list_prod_almacenados.append(ProductoAlmacenado.objects.get_or_create(producto=producto['producto'],cantidad=cantidad_almacenada))
 

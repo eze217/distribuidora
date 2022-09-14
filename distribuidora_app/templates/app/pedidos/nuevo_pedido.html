@@ -61,17 +61,32 @@
                     </thead>
                     <tbody id="contenido"> 
                         {%if productoList %}
-                            {%for producto in productoList%}
-                                <tr>
-                                    <td>{{producto.name}}</td>
-                                    <td>{{producto.precio}}</td>
-                                    <td>{{producto.descripcion}}</td>
-                                    <td><input type="number" onchange="cuenta()"></td>
-                                    <td><input type="text" value="{{producto.id}}" class="oculto"></td>
-                                    <td></td>
-                                </tr>
-                            {%endfor%}
+                            {%if request.user.is_staff %}
+                                {%for producto in productoList%}
+                                    <tr>
+                                        <td>{{producto.name}}</td>
+                                        <td>{{producto.precio}}</td>
+                                        <td>{{producto.descripcion}}</td>
+                                        <td><input type="number" onchange="cuenta()"></td>
+                                        <td><input type="text" value="{{producto.id}}" class="oculto"></td>
+                                        <td></td>
+                                    </tr>
+                                {%endfor%}
+                                {%else%}   
+                                <!-- CLIENTE -->
+                                {%for producto in productoList%}
+                                    <tr>
+                                        <td>{{producto.producto.name}}</td>
+                                        <td>{{producto.costoRemarcado}}</td>
+                                        <td>{{producto.producto.descripcion}}</td>
+                                        <td><input type="number" onchange="cuenta()"></td>
+                                        <td><input type="text" value="{{producto.id}}" class="oculto"></td>
+                                        <td></td>
+                                    </tr>
+                                {%endfor%}
+                            
 
+                            {%endif%}
                         {%endif%}
 
                     </tbody>

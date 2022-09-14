@@ -58,7 +58,9 @@
             </button>
                 {%endif%}
             </h5>
+            {%if request.user.is_staff%}
             <h5>Movimiento generado = {{pedido.tipo_pedido}}</h5>
+            {%endif%}
               
         </div>
         <div class="col-4 oculto" >
