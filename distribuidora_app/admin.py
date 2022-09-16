@@ -13,6 +13,7 @@ admin.site.register(AlmacenStockModel)
 admin.site.register(ProductoEnVenta)
 admin.site.register(Descuento)
 admin.site.register(ProductoAlmacenado)
+admin.site.register(PedidoDetalleClienteModel)
 
 
 

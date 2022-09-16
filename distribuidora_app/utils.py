@@ -48,9 +48,13 @@ def verificoCantidad_EnVenta(lista_prodVta=None):
     if lista_prodVta== None:
         lista_prodVta=ProductoEnVenta.objects.filter(state=True).all()
 
-    stock= cantidadPorProducto()
+    stock= cantidadPorProducto()#traigo stock en almacen
+
     list_prod_venta=[]
+    #verificar est recorrido porque me trae mas de 1 vez los productos si los pongo mas de 1 vez a la venta
+    
     for producto in stock:
+
         for enVta in lista_prodVta:
             if producto['producto'] == enVta.producto :
                 if producto['cantidad'] >= enVta.cantidad_venta:

@@ -247,7 +247,8 @@ function confirmo_pedido(){
 
         if (json.error){
             let h1= document.createElement('h1')
-            h1.innerHTML=' Error al generar el pedido, intentelo de nuevo mas tarde'
+            //h1.innerHTML=' Error al generar el pedido, intentelo de nuevo mas tarde'
+            h1.innerHTML=json.mensaje
             container_detalle.appendChild(h1)
 
         } else{

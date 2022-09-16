@@ -167,7 +167,6 @@ class PedidoDetalleModel (BasicModel):
         return data
 
 
-# ver y restructutar estos modelos
 class ProductoEnVenta(BasicModel):
     producto= models.ForeignKey(ProductoModel,on_delete=models.CASCADE)
     porcentaje_venta = models.FloatField()
@@ -185,6 +184,42 @@ class ProductoEnVenta(BasicModel):
 
     def __str__(self):
         return str(self.porcentaje_venta)
+
+
+
+#==== pedido detalle cliente ========================
+
+
+class PedidoDetalleClienteModel(BasicModel):
+    
+    pedido = models.ForeignKey(PedidoModel, on_delete=models.CASCADE,default=0)
+    cantidad=models.IntegerField(default=0)  
+    producto_venta=models.ForeignKey(ProductoEnVenta, on_delete=models.CASCADE,blank=True,null=True)
+
+    class Meta:
+        verbose_name='Pedido detalle Cliente'
+        verbose_name_plural= 'Pedidos detalle Clientes'
+    
+    def __str__(self):
+        return str(self.pedido.id)
+
+    def costo_total(self):
+        return  self.producto_venta.costoRemarcado() * self.cantidad 
+
+    def json(self):
+        data={
+            'proveedor':self.pedido.id,
+            'cantidad':self.cantidad,
+            'producto':self.producto_venta.producto.name,
+            'precio_unitario':self.producto_venta.costoRemarcado(),
+            'costo':self.costo_total(),
+            
+
+        }
+        return data
+
+
+
 
 class ProductoAlmacenado(BasicModel):
     producto= models.ForeignKey(ProductoModel,on_delete=models.CASCADE)

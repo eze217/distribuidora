@@ -9,7 +9,7 @@ from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm
 from distribuidora_app.forms import PedidoDetalleCreateForm,PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 
-from distribuidora_app.models import AlmacenStockModel, PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel,EntregaModel,ProductoEnVenta
+from distribuidora_app.models import AlmacenStockModel, PedidoDetalleClienteModel, PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel,EntregaModel,ProductoEnVenta
 from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVenta,ProductosNOenVenta
 
 
@@ -82,7 +82,7 @@ class ProveedoresView(View):
                 form=ProveedorForm()
 
 
-                #proveedoresList= CuentaModel.objects.filter(state=True).all()
+                #proveedoresList= CuentaModel.objects.filter(state=True).all().exclude(usuario.perfil.is_cliente)
   
                 #buscar los proveedores que son solo proveedores
                 proveedoresPerfil=Perfil.objects.filter(is_proveedor=True).all()
@@ -382,7 +382,6 @@ class PedidosView(View):
 
                 
 
-                #======================== IMPORTANTE FALTA RESPUESTAS PARA CLIENTES =================
 class PedidoCreateView(View):
     
     def get (self,request,pk=None,*args,**kwargs):
@@ -410,13 +409,16 @@ class PedidoCreateView(View):
                         context['proveedoresList']=proveedoresList
                     #busco mis almacenes
                     entrega=EntregaModel.objects.filter(state=True,cuenta=usuario.perfil.cuenta)
+                    print(entrega)
                     context['entrega']=entrega
 
                 elif usuario.perfil.is_cliente:#valido sea cliente, proveedores NO hacen pedidos
                   
                     productosList=ProductoEnVenta.objects.filter(state=True)
-
-                
+                    #busco mis Domicilio entrega Clietne
+                    entrega=EntregaModel.objects.filter(state=True,cuenta=usuario.perfil.cuenta)
+                    print(entrega)
+                    context['entrega']=entrega
                     context['productoList']=productosList
                 
                 context['HAS_ACCESS']=HAS_ACCESS
@@ -491,7 +493,7 @@ class PedidosJsonView(View):
                             producto_proveedor=ProductoModel.objects.get(state=True,id= metarCode[0]['id'])
                             #creo pedido
                             nuevo_pedido = PedidoModel.objects.create(estado='SOLICITADO',cuenta=producto_proveedor.proveedor,usuario=usuario,tipo_pedido='COMPRA',datos_entrega=almacen)
-                        
+
                         for pedido in metarCode:
 
                             id_pedido = pedido['id']
@@ -511,7 +513,7 @@ class PedidosJsonView(View):
                         list_producto_detalle=[]
 
                         for producto in detalle_pedido:
-                            
+
                             list_producto_detalle.append(producto.json())
                             
                     except:
@@ -533,21 +535,74 @@ class PedidosJsonView(View):
 
                         
                 else:##Respuesta para clientes
-                            
-                    print(' Hace pedido el cliente ')
-                    error=True
-
-                    '''
-                    En cliente debo tomar los productos para los pedidos desde los productos que tengo en almacen
-                    pero a tener en cuenta los costos, debo crear una clase donde los costos de compra sean diferente 
-                    al  precio de venta
                     
-                    '''
+                    error=True
+                    jsonData = json.loads(request.body)
+                    metarCode = jsonData.get('Metar') 
+                    almacen= jsonData.get('almacen')
+                    almacen=EntregaModel.objects.get(id=almacen)
+                    #if pk != None:
+                    try:
+                        error= False
+                        
+                        nuevo_pedido = PedidoModel.objects.create(estado='SOLICITADO',cuenta=usuario.perfil.cuenta,usuario=usuario,tipo_pedido='VENTA',datos_entrega=almacen)
+                        
+                        for pedido in metarCode:
+
+                            id_pedido = pedido['id']
+                            cantidad_pedido = int(pedido['cantidad'])
+                            costo_pedido =pedido['costo']
+
+                            #traigo producto
+
+                            producto_pedido = ProductoEnVenta.objects.get(state=True, id=id_pedido)
+                            #creo el detalle    
+                            
+                            #detalle_pedido= PedidoDetalleClienteModel.objects.create(pedido=nuevo_pedido,cantidad=cantidad_pedido,producto_venta=producto_pedido)
+                            #bajo stock en venta
+                            
+                            if producto_pedido.cantidad_venta >= cantidad_pedido :
+                                producto_pedido.cantidad_venta -= cantidad_pedido
+                                producto_pedido.save()
+                                detalle_pedido= PedidoDetalleClienteModel.objects.create(pedido=nuevo_pedido,cantidad=cantidad_pedido,producto_venta=producto_pedido)
+                                #bajo el stock general
+                                stock=AlmacenStockModel.objects.filter(producto= producto_pedido.producto).first()
+                                stock.cantidad -= cantidad_pedido
+                                stock.save()
+                            else: 
+                                #como no hay stock elimino el pedido y envio error
+                                nuevo_pedido.delete()
+                                error= True
+                                mensaje='Cantidad solicitada de {} supera al stock actual. Cantidad maxima a solicitar: {} '
+                                
+
+
+                        list_producto_detalle=[]
+
+                        #armo el contexto para la respuesta
+                        if not error:
+                            detalle_pedido=PedidoDetalleClienteModel.objects.filter(state=True,pedido=nuevo_pedido)
+
+
+                            for producto in detalle_pedido:
+                                list_producto_detalle.append(producto.json())
+
+
+                            #FALTA BAJAR PRODUCTO DE STOCK
+
+
+                            
+                    except  :
+                        error= True
+                        mensaje=''
+                        stock=AlmacenStockModel.objects.filter(producto= producto_pedido.producto)
+
 
                     context={
                         'error':error,
-                        'data':{'pedido':'[nuevo_pedido.json()]',
-                                'detalle_pedido':'list_producto_detalle'
+                        'mensaje':mensaje,
+                        'data':{'pedido':[nuevo_pedido.json()],
+                                'detalle_pedido':list_producto_detalle
                                 }
                         }
 
