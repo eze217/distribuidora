@@ -541,40 +541,50 @@ class PedidosJsonView(View):
                     metarCode = jsonData.get('Metar') 
                     almacen= jsonData.get('almacen')
                     almacen=EntregaModel.objects.get(id=almacen)
-                    #if pk != None:
+                    mensaje=''
                     try:
                         error= False
-                        
+                        #Creo el pedido
                         nuevo_pedido = PedidoModel.objects.create(estado='SOLICITADO',cuenta=usuario.perfil.cuenta,usuario=usuario,tipo_pedido='VENTA',datos_entrega=almacen)
                         
+                        #Creo lista para guardar productos que superen cantidad de ser necesario
+                        lista_prod_cantMax_para_error=[]
+
+                        #recorro los productos solicitados
                         for pedido in metarCode:
 
                             id_pedido = pedido['id']
                             cantidad_pedido = int(pedido['cantidad'])
                             costo_pedido =pedido['costo']
 
-                            #traigo producto
-
+                            #traigo producto solicitado
                             producto_pedido = ProductoEnVenta.objects.get(state=True, id=id_pedido)
-                            #creo el detalle    
-                            
-                            #detalle_pedido= PedidoDetalleClienteModel.objects.create(pedido=nuevo_pedido,cantidad=cantidad_pedido,producto_venta=producto_pedido)
+                            #creo el detalle         
                             #bajo stock en venta
+                            #creo lista de error en caso que corresponda
                             
                             if producto_pedido.cantidad_venta >= cantidad_pedido :
+                                #si la cantidad solicitada es igual o menor a lo que tengo en stock de venta, creo el detalle
+                                #bajo el stock de venta de ese producto
                                 producto_pedido.cantidad_venta -= cantidad_pedido
                                 producto_pedido.save()
                                 detalle_pedido= PedidoDetalleClienteModel.objects.create(pedido=nuevo_pedido,cantidad=cantidad_pedido,producto_venta=producto_pedido)
-                                #bajo el stock general
-                                stock=AlmacenStockModel.objects.filter(producto= producto_pedido.producto).first()
-                                stock.cantidad -= cantidad_pedido
-                                stock.save()
+                                #bajo el stock general creo el movimiento de egreso
+                                
+                                AlmacenStockModel.objects.create(cantidad=cantidad_pedido,producto=producto_pedido.producto,movimiento='EGRESO',nro_pedido=nuevo_pedido)
                             else: 
                                 #como no hay stock elimino el pedido y envio error
-                                nuevo_pedido.delete()
                                 error= True
-                                mensaje='Cantidad solicitada de {} supera al stock actual. Cantidad maxima a solicitar: {} '
+                                lista_prod_cantMax_para_error.append({'producto':producto_pedido.producto,'cantidad_maxima':producto_pedido.cantidad_venta})
                                 
+                        #controlo si algun producto dio error, elimino todo y preparo mensaje
+                        if error:
+                            detalle_eliminar= PedidoDetalleClienteModel.objects.filter(state=True, pedido=nuevo_pedido).all()
+                            detalle_eliminar.delete()
+                            nuevo_pedido.delete()
+                            mensaje= 'Cantidad solicitada de los siguientes productos supera al stock en venta:\n'
+                            for prod_error in lista_prod_cantMax_para_error:
+                                mensaje+='{}, cantidad máxima:{}.\n'.format(prod_error['producto'],prod_error['cantidad_maxima'])
 
 
                         list_producto_detalle=[]
