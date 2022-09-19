@@ -640,22 +640,20 @@ class PedidoDetalleView(View):
                 if pk != None:
 
                     pedidos_seleccionado=PedidoModel.objects.get(state=True,id= pk)
-                    detalle_pedido_seleccionado =PedidoDetalleModel.objects.filter(state=True, pedido= pedidos_seleccionado)
-                    #if usuario.is_staff : 
-                        #Traigo el pedido y el detalle y el FORM para ver y editar
+                    if usuario.perfil.is_cliente:
+                        detalle_pedido_seleccionado =PedidoDetalleClienteModel.objects.filter(state=True, pedido= pedidos_seleccionado)
+                    else:    
+                        detalle_pedido_seleccionado =PedidoDetalleModel.objects.filter(state=True, pedido= pedidos_seleccionado)
 
-                    form_pedido_seleccionado=PedidoCreateForm(instance=pedidos_seleccionado)
+                    #si tengo permiso envio el form para editar el pedido
+                    form_pedido_seleccionado=''
+                    if usuario.has_perm('distribuidora_app.change_pedidomodel'):
+                        form_pedido_seleccionado=PedidoCreateForm(instance=pedidos_seleccionado)
                     
-                    lista_form_detalle=[]
+
+                    '''lista_form_detalle=[]
                     for form_detalle in detalle_pedido_seleccionado:
-                        lista_form_detalle.append(PedidoDetalleCreateForm(instance=form_detalle))
-                    '''
-                    elif usuario.perfil.is_proveedor: 
-                        
-                        pedidos_list=PedidoModel.objects.filter(state=True,proveedor=usuario.perfil.cuenta).order_by('-id')
-                    elif usuario.perfil.is_cliente:
-                        pedidos_list=PedidoModel.objects.filter(state=True,usuario=usuario).order_by('-id')'''
-                    
+                        lista_form_detalle.append(PedidoDetalleCreateForm(instance=form_detalle))'''
                     
                     context={
                         'usuario':usuario,
@@ -663,7 +661,7 @@ class PedidoDetalleView(View):
                         'pedido':pedidos_seleccionado,
                         'detalle_pedido':detalle_pedido_seleccionado,
                         'form_pedido':form_pedido_seleccionado,
-                        'form_detalle_pedido':lista_form_detalle
+                        #'form_detalle_pedido':lista_form_detalle
                     }
 
                     if usuario.has_perm('distribuidora_app.view_entregamodel'):
