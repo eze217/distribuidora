@@ -1,5 +1,5 @@
 from django.db.models import Sum
-from distribuidora_app.models import AlmacenStockModel, EntregaModel, ProductoEnVenta,ProductoModel,ProductoAlmacenado
+from distribuidora_app.models import AlmacenStockModel, EntregaModel, PedidoDetalleClienteModel, PedidoDetalleModel, ProductoEnVenta,ProductoModel,ProductoAlmacenado
 
 
 
@@ -97,3 +97,44 @@ def ProductosNOenVenta():
     return list_prod_almacenados
 
 
+
+#Funcion control cambio estado
+
+def cambio_estado_pedido(estado_actual,pedido):
+
+    '''
+        Como al generar el formulario con la instancia no obtengo el estado "anterior" pido en los parametros
+        me envien el estado "actial/anterior" al cambio para hacer los filtros correspondientes
+    '''
+
+    nuevo_estado=pedido.estado
+
+    #Separo los cambios si el pedido es de un cliente o de la empresa a un proveedor
+
+    #===========================CAMBIO ESTADO PEDIDOS DE CLIENTES ========================
+    if pedido.usuario.perfil.is_cliente:
+        #codigo para cliente
+        print('cliente')
+        '''
+        detalle_Pedido= PedidoDetalleClienteModel.objects.filter(pedido=pedido).all()
+
+        if nuevo_estado == 'ANULADO' and estado_actual!= 'ANULADO':
+
+           for
+        '''
+            
+        
+    else:
+        #===========================CAMBIO ESTADO PARA PEDIDOS A PROVEEDORES ========================
+        detalle_Pedido= PedidoDetalleModel.objects.filter(pedido=pedido).all()
+        #Paso a Entregado, genero stock
+        if nuevo_estado == 'ENTREGADO' and estado_actual!= 'ENTREGADO':#Lo pongo entregado
+            for stock in detalle_Pedido:
+                #Movimiento ingreso porque agrega a stock
+                agrego_stock= AlmacenStockModel.objects.create(cantidad=stock.cantidad,producto=stock.producto,movimiento='INGRESO',almacen=pedido.datos_entrega,nro_pedido=pedido)
+
+        elif estado_actual== 'ENTREGADO' and nuevo_estado != 'ENTREGADO':#Lo saco de Entregado
+            #Lo saco de entregado, debo eliminar el stock
+            #Elimino directamente el movimiento, ya que es un "entregado" falso, por eso no genero un mov. de EGRESO
+            stock_previo= AlmacenStockModel.objects.filter(nro_pedido=pedido).all()
+            stock_previo.delete()    

@@ -10,7 +10,7 @@ from distribuidora_app.forms import PedidoDetalleCreateForm,PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 
 from distribuidora_app.models import AlmacenStockModel, PedidoDetalleClienteModel, PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel,EntregaModel,ProductoEnVenta
-from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVenta,ProductosNOenVenta
+from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVenta,ProductosNOenVenta,cambio_estado_pedido
 
 
 import json
@@ -687,7 +687,7 @@ class PedidoDetalleView(View):
             if  usuario.is_staff and usuario.has_perm('distribuidora_app.change_pedidomodel') or usuario.perfil.is_proveedor:
              
                 pedido= PedidoModel.objects.get(id=pk)
-                estado_actual=pedido.estado
+                estado_actual=pedido.estado#lo guardo ahora ya que luego al usar la instancia en el form, se modifica.
                 form_pedido=PedidoEdicionForm(request.POST,instance=pedido)
                 
                 
@@ -695,20 +695,8 @@ class PedidoDetalleView(View):
                     
                     pedido_mod = form_pedido.save(commit=False)
                     
-
-                    if pedido_mod.estado =="ENTREGADO":
-                        
-                        #Si esta entregado debo hacer un cambio agregarlo en el stock del almacen.
-                        detalle_pedido = PedidoDetalleModel.objects.filter(pedido=pedido).all()
-                        for stock in detalle_pedido:
-                            agrego_stock= AlmacenStockModel.objects.create(cantidad=stock.cantidad,producto=stock.producto,movimiento='INGRESO',almacen=pedido_mod.datos_entrega,nro_pedido=pedido_mod)#movimiento ingreso porque agrega a stock
-                   #verifico si el estado actual es entregado y lo estoy cambiando, para eliminar el stock
-                    elif estado_actual == 'ENTREGADO' and pedido_mod.estado !="ENTREGADO":
-                        #busco stock y elimino
-                        stock_previo= AlmacenStockModel.objects.filter(nro_pedido=pedido).all()
-                        stock_previo.delete()
-
-
+                    #cambio el estado
+                    cambio_estado_pedido(estado_actual,pedido)
 
                     #Luego de verificar el estado guardo el cambio
                     pedido = form_pedido.save()
