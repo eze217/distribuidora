@@ -3,10 +3,10 @@ from django.shortcuts import render,redirect
 from django.views import View
 from django.http.response import JsonResponse
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import user_passes_test
+
 
 from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm,ProductoEditForm
-from distribuidora_app.forms import PedidoDetalleCreateForm,PedidoCreateForm
+from distribuidora_app.forms import PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 from distribuidora_app.forms import ProductoEnVentaEditForm
 
@@ -18,22 +18,6 @@ import json
 from user.models import Perfil
 
 
-'''
-# Create your views here.
-def group_required(*group_names):
-    """ Grupos, checar si pertenece a grupo """
-    print('entre',group_names)
-    def check(user):
-        print('user',user)
-        if user.groups.filter(name__in=group_names).exists() | user.is_superuser:
-            return True
-        else:
-            return False
-    return user_passes_test(check, login_url='/prohibido/')
-'''
-
-
-#@group_required('distribuidores','proveedores') 
 def home (request):
     
     if request.method == 'GET':
