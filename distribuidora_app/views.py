@@ -598,7 +598,7 @@ class PedidosJsonView(View):
                                 list_producto_detalle.append(producto.json())
 
 
-                            #FALTA BAJAR PRODUCTO DE STOCK
+                            
 
 
                             
@@ -640,7 +640,7 @@ class PedidoDetalleView(View):
                 if pk != None:
 
                     pedidos_seleccionado=PedidoModel.objects.get(state=True,id= pk)
-                    if usuario.perfil.is_cliente:
+                    if pedidos_seleccionado.usuario.perfil.is_cliente:
                         detalle_pedido_seleccionado =PedidoDetalleClienteModel.objects.filter(state=True, pedido= pedidos_seleccionado)
                     else:    
                         detalle_pedido_seleccionado =PedidoDetalleModel.objects.filter(state=True, pedido= pedidos_seleccionado)

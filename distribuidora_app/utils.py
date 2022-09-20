@@ -1,5 +1,6 @@
+from ast import Return
 from django.db.models import Sum
-from distribuidora_app.models import AlmacenStockModel, EntregaModel, PedidoDetalleClienteModel, PedidoDetalleModel, ProductoEnVenta,ProductoModel,ProductoAlmacenado
+from distribuidora_app.models import AlmacenStockModel, EntregaModel, PedidoDetalleClienteModel, PedidoDetalleModel, PedidoModel, ProductoEnVenta,ProductoModel,ProductoAlmacenado
 
 
 
@@ -114,15 +115,18 @@ def cambio_estado_pedido(estado_actual,pedido):
     #===========================CAMBIO ESTADO PEDIDOS DE CLIENTES ========================
     if pedido.usuario.perfil.is_cliente:
         #codigo para cliente
-        print('cliente')
-        '''
         detalle_Pedido= PedidoDetalleClienteModel.objects.filter(pedido=pedido).all()
-
+        if estado_actual == 'ANULADO':
+            #si esta anulado ya no se puede cambiar / como necesita tomar el stock de nuevo puede que ya no tenga mas.
+            return None
         if nuevo_estado == 'ANULADO' and estado_actual!= 'ANULADO':
-
-           for
-        '''
-            
+            #Si lo anulo revierto los movimientos y devuelvo las cantidades al stock
+           for producto in detalle_Pedido:
+                producto.producto_venta.cantidad_venta += producto.cantidad
+                producto.producto_venta.save()
+                
+                AlmacenStockModel.objects.create(cantidad=producto.cantidad,producto=producto.producto_venta.producto,movimiento='INGRESO',nro_pedido=producto.pedido)
+        
         
     else:
         #===========================CAMBIO ESTADO PARA PEDIDOS A PROVEEDORES ========================
