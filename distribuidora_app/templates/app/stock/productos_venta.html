@@ -34,6 +34,7 @@
                         <th>
                             Cantidad en venta
                         </th>
+                        <th></th>
 
                     </tr>
                 </thead>
@@ -52,6 +53,15 @@
                         </td>
                         <td>
                             {{producto.cantidad_venta}}
+                        </td>
+                        <td>
+                            {%if perms.distribuidora_app.change_productoenventa%}
+                            <a href="{%url 'productos_venta_cancel' producto.id  %}"> 
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill ver-rojo" viewBox="0 0 16 16">
+                                    <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
+                                  </svg>
+                            </a>
+                            {%endif%}
                         </td>
             
                     </tr>
@@ -75,6 +85,17 @@
                         <th>
                             Cantidad
                         </th>
+                        {%if form_editable %}
+                        <th>
+                            Cant. Para venta
+                        </th>
+                        <th>
+                            Porcentaje de Ganancia
+                        </th>
+                        <th>
+                            
+                        </th>
+                        {%else%}
                         <th>
                             
                         </th>
@@ -84,28 +105,73 @@
                         <th>
                             
                         </th>
+
+
+                        {%endif%}
                     </tr>
                 </thead>
                 <tbody>
                     {%if productos_en_almacenados%}
                         {%for producto in productos_en_almacenados%}
-                    <tr>
-                        <td>
-                            {{producto.0.producto}}
-                        </td>
-                        <td>
-                            {{producto.0.cantidad}}
-                        </td>
-                        <td>
-                         
-                        </td>
-                        <td>
-                   
-                        </td>
-                        <td>
-                      
-                        </td>
-                    </tr>
+                        <!--  creo fila editable  -->
+                        
+                            {%if producto_editable == producto.0.producto.id%}
+
+                            <tr>
+                                <form action="" method="post">{%csrf_token%}
+                                    <td>
+                                        {{producto.0.producto.name}}
+                                    </td>
+                                    <td>
+                                        {{producto.0.cantidad}}
+                                    </td>
+                                    <td>
+                                        {{form_editable.cantidad_venta}}
+                                    </td>
+                                    <td>
+                                        {{form_editable.porcentaje_venta}}
+                                    </td>
+                              
+                                    <td>
+                                        <button type="submit"> 
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill ver" viewBox="0 0 16 16">
+                                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                              </svg>
+                                            </button>
+                                            <a href="{%url 'productos_venta'%}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+                                                  </svg>
+                                            </a> 
+                                    </td>
+                                </form>
+                            </tr>
+                            {%else%}
+                            <tr>
+                                <td>
+                                    {{producto.0.producto}}
+                                </td>
+                                <td>
+                                    {{producto.0.cantidad}}
+                                </td>
+                                <td>
+                                 
+                                </td>
+                                <td>
+                           
+                                </td>
+                                <td>
+                                    {%if perms.distribuidora_app.change_productoenventa%}
+                                    <a href="{%url 'productos_venta_edit' producto.0.id  %}"> 
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil ver" viewBox="0 0 16 16">
+                                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                      </svg>
+                                    </a>
+                                    {%endif%}
+                                </td>
+                            </tr>
+
+                            {%endif%}
                         {%endfor%}
                     {%endif%}
                 </tbody>

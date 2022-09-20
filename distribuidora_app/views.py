@@ -8,8 +8,9 @@ from django.contrib.auth.decorators import user_passes_test
 from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm,ProductoEditForm
 from distribuidora_app.forms import PedidoDetalleCreateForm,PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
+from distribuidora_app.forms import ProductoEnVentaEditForm
 
-from distribuidora_app.models import AlmacenStockModel, PedidoDetalleClienteModel, PedidoDetalleModel, PedidoModel, CuentaModel,ProductoModel,EntregaModel,ProductoEnVenta
+from distribuidora_app.models import AlmacenStockModel, PedidoDetalleClienteModel, PedidoDetalleModel, PedidoModel, CuentaModel, ProductoAlmacenado,ProductoModel,EntregaModel,ProductoEnVenta
 from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVenta,ProductosNOenVenta,cambio_estado_pedido
 
 
@@ -263,7 +264,7 @@ class ProductosView(View):
         usuario = self.request.user
         if usuario.is_authenticated and usuario.is_active:
 
-            #if str(usuario.groups.get())=='distribuidora':  
+      
                
             if pk != None:#si hay pk es porque es una edicion
                 if usuario.has_perm('distribuidora_app.change_productomodel'):
@@ -764,9 +765,8 @@ class ProductosVentaView(View):
 
                 #busco productos a la venta
 
-                #productos_en_venta = 
 
-                productos_en_venta=verificoCantidad_EnVenta(ProductoEnVenta.objects.filter(state=True).all())
+                productos_en_venta=verificoCantidad_EnVenta(ProductoEnVenta.objects.filter(state=True).all().order_by('producto__id'))
                 productos_en_almacenados=ProductosNOenVenta()
                 
 
@@ -777,8 +777,60 @@ class ProductosVentaView(View):
             
                         }
 
+                if pk != None:
+                
+                    if usuario.has_perm('distribuidora_app.change_productoenventa'):
+
+                        producto_editable = ProductoAlmacenado.objects.filter(state=True,pk=pk).first()
+
+                        
+                        form_editable=ProductoEnVentaEditForm()
+                        context['form_editable']=form_editable
+                        context['producto_editable']=producto_editable.producto.id
+
+
                 return render(request,'app/stock/productos_venta.html',context)
              #sin permisos   
             return redirect('no_autorizado')
         #no logueado
         return redirect('landing_home')
+
+    
+    def post (self,request,pk = None,*args,**kwargs):
+        usuario = self.request.user
+        HAS_ACCESS=False
+        if usuario.is_authenticated and usuario.is_active:
+            if usuario.has_perm('distribuidora_app.add_productoenventa') and usuario.is_staff:
+                HAS_ACCESS=True
+                producto_almacenado = ProductoAlmacenado.objects.filter(state=True,pk=pk).first()
+
+                producto_enVenta = ProductoEnVentaEditForm(request.POST)
+
+                if producto_enVenta.is_valid():
+                    producto= ProductoEnVenta()
+                    producto = producto_enVenta.save(commit=False)
+                    producto.producto= producto_almacenado.producto
+                    producto = producto_enVenta.save()
+                
+                return redirect('productos_venta')
+            #sin permisos   
+            return redirect('no_autorizado')
+        #no logueado
+        return redirect('landing_home')
+
+               
+
+
+def cambioEstadoProdVenta(request,pk):
+    usuario= request.user
+    if usuario.is_authenticated and usuario.is_active and usuario.is_staff:
+        if usuario.has_perm('distribuidora_app.change_productoenventa'):
+            
+            producto_en_venta = ProductoEnVenta.objects.get(state=True,pk=pk)
+            producto_en_venta.state =False
+            producto_en_venta.save()
+            return redirect('productos_venta')
+        #sin permisos   
+        return redirect('no_autorizado')
+    #no logueado
+    return redirect('landing_home')

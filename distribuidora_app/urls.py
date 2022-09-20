@@ -7,7 +7,7 @@ from .views import ProductosView,productoEliminaView
 
 
 
-from .views import PedidosView,PedidoCreateView,PedidosJsonView,PedidoDetalleView,StockView,ProductosVentaView
+from .views import PedidosView,PedidoCreateView,PedidosJsonView,PedidoDetalleView,StockView,ProductosVentaView,cambioEstadoProdVenta
 
 
 urlpatterns = [
@@ -33,6 +33,9 @@ urlpatterns = [
     path('stock/<int:pk>',StockView.as_view(),name='stock_almacen'),
 
     path('productos_venta/',ProductosVentaView.as_view(),name='productos_venta'),
+    path('productos_venta/<int:pk>',ProductosVentaView.as_view(),name='productos_venta_edit'),
+    path('productos_venta_cancel/<int:pk>',cambioEstadoProdVenta,name='productos_venta_cancel'),
+    
 
 
 

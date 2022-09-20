@@ -47,7 +47,7 @@ def cantidadPorProducto(almacen=None):#recibo el queryset con de la clase almace
 def verificoCantidad_EnVenta(lista_prodVta=None):
 
     if lista_prodVta== None:
-        lista_prodVta=ProductoEnVenta.objects.filter(state=True).all()
+        lista_prodVta=ProductoEnVenta.objects.filter(state=True).all().order_by('producto')
 
     stock= cantidadPorProducto()#traigo stock en almacen
 
