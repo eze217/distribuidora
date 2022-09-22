@@ -13,6 +13,8 @@ from distribuidora_app.forms import ProductoEnVentaEditForm
 from distribuidora_app.models import AlmacenStockModel, PedidoDetalleClienteModel, PedidoDetalleModel, PedidoModel, CuentaModel, ProductoAlmacenado,ProductoModel,EntregaModel,ProductoEnVenta
 from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVenta,ProductosNOenVenta,cambio_estado_pedido
 
+#NOTIFICACIONES
+from notificacion.utils import notificacion_pedido_realizado
 
 import json
 from user.models import Perfil
@@ -394,7 +396,7 @@ class PedidoCreateView(View):
                         context['proveedoresList']=proveedoresList
                     #busco mis almacenes
                     entrega=EntregaModel.objects.filter(state=True,cuenta=usuario.perfil.cuenta)
-                    print(entrega)
+                   
                     context['entrega']=entrega
 
                 elif usuario.perfil.is_cliente:#valido sea cliente, proveedores NO hacen pedidos
@@ -402,7 +404,7 @@ class PedidoCreateView(View):
                     productosList=ProductoEnVenta.objects.filter(state=True)
                     #busco mis Domicilio entrega Clietne
                     entrega=EntregaModel.objects.filter(state=True,cuenta=usuario.perfil.cuenta)
-                    print(entrega)
+                    
                     context['entrega']=entrega
                     context['productoList']=productosList
                 
@@ -494,6 +496,8 @@ class PedidosJsonView(View):
                         #armo el contexto para la respuesta
 
                         detalle_pedido=PedidoDetalleModel.objects.filter(state=True,pedido=nuevo_pedido)
+                        notificacion_pedido_realizado(nuevo_pedido)
+
 
                         list_producto_detalle=[]
 
@@ -577,6 +581,7 @@ class PedidosJsonView(View):
                         #armo el contexto para la respuesta
                         if not error:
                             detalle_pedido=PedidoDetalleClienteModel.objects.filter(state=True,pedido=nuevo_pedido)
+                            notificacion_pedido_realizado(nuevo_pedido)
 
 
                             for producto in detalle_pedido:

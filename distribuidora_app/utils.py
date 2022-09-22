@@ -1,7 +1,7 @@
 from ast import Return
 from django.db.models import Sum
 from distribuidora_app.models import AlmacenStockModel, EntregaModel, PedidoDetalleClienteModel, PedidoDetalleModel, PedidoModel, ProductoEnVenta,ProductoModel,ProductoAlmacenado
-
+from notificacion.models import NotificacionModel
 
 
 def cantidadPorProducto(almacen=None):#recibo el queryset con de la clase almacenstokmodel
@@ -126,7 +126,7 @@ def cambio_estado_pedido(estado_actual,pedido):
                 producto.producto_venta.save()
                 
                 AlmacenStockModel.objects.create(cantidad=producto.cantidad,producto=producto.producto_venta.producto,movimiento='INGRESO',nro_pedido=producto.pedido)
-        
+
         
     else:
         #===========================CAMBIO ESTADO PARA PEDIDOS A PROVEEDORES ========================

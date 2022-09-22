@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'distribuidora',
     'user',
     'distribuidora_app',
+    'notificacion',
 ]
 
 MIDDLEWARE = [
