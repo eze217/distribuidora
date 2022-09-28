@@ -29,30 +29,41 @@
         </div>
     </div>
     <div class="row">
+  
+       
+        {%if perms.notificacion.view_notificacionmodel%}
+        {%if notificaciones%}
+       
+
         <div class="col col-12 notificaciones-dashboard">Notificaciones
             <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>
-                            Nombre
+                            Asunto
                         </th>
                         <th>
-                            Telefono
+                            Descripcion
                         </th>
                     </tr>
                 </thead>
                 <tbody>
+                    {%for notificacion in notificaciones%}
                     <tr>
                         <td>
-                            proveedor
+                            {{notificacion.asunto}}
                         </td>
                         <td>
-                            telefono
+                            {{notificacion.descripcion}}
                         </td>
                     </tr>
+                    {%endfor%}
                 </tbody>
               </table>
         </div>
+
+        {%endif%}
+        {%endif%}
     </div>
 
 </div>

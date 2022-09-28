@@ -12,9 +12,10 @@ from distribuidora_app.forms import ProductoEnVentaEditForm
 
 from distribuidora_app.models import AlmacenStockModel, PedidoDetalleClienteModel, PedidoDetalleModel, PedidoModel, CuentaModel, ProductoAlmacenado,ProductoModel,EntregaModel,ProductoEnVenta
 from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVenta,ProductosNOenVenta,cambio_estado_pedido
+from notificacion.models import NotificacionModel
 
 #NOTIFICACIONES
-from notificacion.utils import notificacion_pedido_realizado
+from notificacion.utils import notificacion_cambio_estado, notificacion_pedido_realizado
 
 import json
 from user.models import Perfil
@@ -43,9 +44,13 @@ class Home_App(View):
     
     def get(self,request,*args,**kwargs):
         HAS_ACCESS=False
-        context= {}  
-        if self.request.user.is_authenticated:
+        usuario=self.request.user
+        if usuario.is_authenticated:
+            context= {}
             HAS_ACCESS=True
+            if usuario.has_perm('notificacion.view_notificacionmodel'):
+                notificaciones= NotificacionModel.objects.filter(state=True,cuenta_notificada=usuario.perfil.cuenta,leida=False).all()
+                context['notificaciones']=notificaciones
         
             context['HAS_ACCESS']= HAS_ACCESS
             
@@ -686,10 +691,12 @@ class PedidoDetalleView(View):
                     pedido_mod = form_pedido.save(commit=False)
                     
                     #cambio el estado
-                    cambio_estado_pedido(estado_actual,pedido)
-
+                    if cambio_estado_pedido(estado_actual,pedido):
+                        
+                        notificacion_cambio_estado(pedido, usuario_cambio=usuario)
+                        
                     #Luego de verificar el estado guardo el cambio
-                    pedido = form_pedido.save()
+                        pedido = form_pedido.save()
 
                 return redirect('pedidos_detalle',pk)
            

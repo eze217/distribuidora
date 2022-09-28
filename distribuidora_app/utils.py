@@ -4,6 +4,10 @@ from distribuidora_app.models import AlmacenStockModel, EntregaModel, PedidoDeta
 from notificacion.models import NotificacionModel
 
 
+
+
+
+
 def cantidadPorProducto(almacen=None):#recibo el queryset con de la clase almacenstokmodel
 
    
@@ -116,17 +120,20 @@ def cambio_estado_pedido(estado_actual,pedido):
     if pedido.usuario.perfil.is_cliente:
         #codigo para cliente
         detalle_Pedido= PedidoDetalleClienteModel.objects.filter(pedido=pedido).all()
+      
         if estado_actual == 'ANULADO':
+          
             #si esta anulado ya no se puede cambiar / como necesita tomar el stock de nuevo puede que ya no tenga mas.
-            return None
+            
+            return False
         if nuevo_estado == 'ANULADO' and estado_actual!= 'ANULADO':
+        
             #Si lo anulo revierto los movimientos y devuelvo las cantidades al stock
-           for producto in detalle_Pedido:
+            for producto in detalle_Pedido:
                 producto.producto_venta.cantidad_venta += producto.cantidad
-                producto.producto_venta.save()
-                
+                producto.producto_venta.save() 
                 AlmacenStockModel.objects.create(cantidad=producto.cantidad,producto=producto.producto_venta.producto,movimiento='INGRESO',nro_pedido=producto.pedido)
-
+            
         
     else:
         #===========================CAMBIO ESTADO PARA PEDIDOS A PROVEEDORES ========================
@@ -142,3 +149,7 @@ def cambio_estado_pedido(estado_actual,pedido):
             #Elimino directamente el movimiento, ya que es un "entregado" falso, por eso no genero un mov. de EGRESO
             stock_previo= AlmacenStockModel.objects.filter(nro_pedido=pedido).all()
             stock_previo.delete()    
+    
+    
+
+    return True
