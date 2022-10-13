@@ -32,3 +32,15 @@
     text-align: center;
     
 }
+
+
+.tabla_notificaciones{
+    width: 100%;
+    border: 1px solid black;
+    height: 400px;
+    margin: 10px;
+    padding: 10px;
+    overflow-y: scroll;
+    border-radius: 20px;
+    
+}
