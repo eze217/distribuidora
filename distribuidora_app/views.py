@@ -15,7 +15,7 @@ from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVent
 from notificacion.models import NotificacionModel
 
 #NOTIFICACIONES
-from notificacion.utils import notificacion_cambio_estado, notificacion_pedido_realizado
+from notificacion.utils import control_stock_venta, notificacion_cambio_estado, notificacion_pedido_realizado
 
 import json
 from user.models import Perfil
@@ -49,7 +49,7 @@ class Home_App(View):
             context= {}
             HAS_ACCESS=True
             if usuario.has_perm('notificacion.view_notificacionmodel'):
-                notificaciones= NotificacionModel.objects.filter(state=True,cuenta_notificada=usuario.perfil.cuenta,leida=False).all()
+                notificaciones= NotificacionModel.objects.filter(state=True,cuenta_notificada=usuario.perfil.cuenta,leida=False).all().order_by('prioridad','-id')
                 context['notificaciones']=notificaciones
         
             context['HAS_ACCESS']= HAS_ACCESS
@@ -566,6 +566,10 @@ class PedidosJsonView(View):
                                 #bajo el stock general creo el movimiento de egreso
                                 
                                 AlmacenStockModel.objects.create(cantidad=cantidad_pedido,producto=producto_pedido.producto,movimiento='EGRESO',nro_pedido=nuevo_pedido)
+
+                                #CONTROLO STOCK PARA NOTICAR
+                                control_stock_venta(producto=producto_pedido.producto)
+
                             else: 
                                 #como no hay stock elimino el pedido y envio error
                                 error= True
