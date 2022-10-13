@@ -16,15 +16,20 @@ def cantidadPorProducto(almacen=None):#recibo el queryset con de la clase almace
         
         return None
 
+
+    anulaciones=AlmacenStockModel.objects.filter(movimiento='INGRESO',nro_pedido__usuario__perfil__is_cliente= True).aggregate(cantidad_total=Sum('cantidad')) 
     #stock por productos, trae un diccionario con id prod y cantidad total en stock
     if almacen == None:
         #si no llega almacen traigo todos
         consulta_Ingreso = AlmacenStockModel.objects.filter(movimiento='INGRESO').values('producto').annotate(Sum('cantidad'))
         consulta_Egreso = AlmacenStockModel.objects.filter(movimiento='EGRESO').values('producto').annotate(Sum('cantidad'))
-
+        anulaciones['cantidad_total']=0
     else:#si envio un almacen busco por ese en especifico
         consulta_Ingreso= AlmacenStockModel.objects.filter(state=True,almacen=almacen,movimiento='INGRESO').values('producto').annotate(Sum('cantidad'))
         consulta_Egreso= AlmacenStockModel.objects.filter(state=True,movimiento='EGRESO').values('producto').annotate(Sum('cantidad'))
+        #Anulaciones se descuenta solo cuando se filtra por almacen ya que en INGRESO de la anulacion no se marca almacen, entonces queda por debajo.
+        
+
     #armo nueva lista trayendo los productos segun ID
 
     lista_total_productos=[]
@@ -35,7 +40,7 @@ def cantidadPorProducto(almacen=None):#recibo el queryset con de la clase almace
             for egreso in consulta_Egreso:
                 
                 if producto['producto'] == egreso['producto']: 
-                    lista_total_productos.append({'producto':ProductoModel.objects.get(id=producto['producto']),'cantidad':producto['cantidad__sum']- egreso['cantidad__sum'] })
+                    lista_total_productos.append({'producto':ProductoModel.objects.get(id=producto['producto']),'cantidad':producto['cantidad__sum']- (egreso['cantidad__sum']-anulaciones['cantidad_total']) })
                     encuentra=True
                  
                     
