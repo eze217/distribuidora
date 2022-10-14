@@ -2,6 +2,7 @@ from ast import Return
 from django.db.models import Sum
 from distribuidora_app.models import AlmacenStockModel, EntregaModel, PedidoDetalleClienteModel, PedidoDetalleModel, PedidoModel, ProductoEnVenta,ProductoModel,ProductoAlmacenado
 from notificacion.models import NotificacionModel
+from user.models import Perfil
 
 
 
@@ -18,6 +19,9 @@ def cantidadPorProducto(almacen=None):#recibo el queryset con de la clase almace
 
 
     anulaciones=AlmacenStockModel.objects.filter(movimiento='INGRESO',nro_pedido__usuario__perfil__is_cliente= True).aggregate(cantidad_total=Sum('cantidad')) 
+  
+    if anulaciones['cantidad_total'] == None:   
+        anulaciones['cantidad_total']=0
     #stock por productos, trae un diccionario con id prod y cantidad total en stock
     if almacen == None:
         #si no llega almacen traigo todos
@@ -25,11 +29,13 @@ def cantidadPorProducto(almacen=None):#recibo el queryset con de la clase almace
         consulta_Egreso = AlmacenStockModel.objects.filter(movimiento='EGRESO').values('producto').annotate(Sum('cantidad'))
         anulaciones['cantidad_total']=0
     else:#si envio un almacen busco por ese en especifico
+        
         consulta_Ingreso= AlmacenStockModel.objects.filter(state=True,almacen=almacen,movimiento='INGRESO').values('producto').annotate(Sum('cantidad'))
-        consulta_Egreso= AlmacenStockModel.objects.filter(state=True,movimiento='EGRESO').values('producto').annotate(Sum('cantidad'))
+        consulta_Egreso= AlmacenStockModel.objects.filter(state=True,movimiento='EGRESO',almacen=almacen).values('producto').annotate(Sum('cantidad'))
         #Anulaciones se descuenta solo cuando se filtra por almacen ya que en INGRESO de la anulacion no se marca almacen, entonces queda por debajo.
         
-
+   
+  
     #armo nueva lista trayendo los productos segun ID
 
     lista_total_productos=[]
@@ -40,6 +46,7 @@ def cantidadPorProducto(almacen=None):#recibo el queryset con de la clase almace
             for egreso in consulta_Egreso:
                 
                 if producto['producto'] == egreso['producto']: 
+       
                     lista_total_productos.append({'producto':ProductoModel.objects.get(id=producto['producto']),'cantidad':producto['cantidad__sum']- (egreso['cantidad__sum']-anulaciones['cantidad_total']) })
                     encuentra=True
                  
@@ -112,6 +119,7 @@ def ProductosNOenVenta():
 
 def cambio_estado_pedido(estado_actual,pedido):
 
+
     '''
         Como al generar el formulario con la instancia no obtengo el estado "anterior" pido en los parametros
         me envien el estado "actial/anterior" al cambio para hacer los filtros correspondientes
@@ -158,3 +166,5 @@ def cambio_estado_pedido(estado_actual,pedido):
     
 
     return True
+
+
