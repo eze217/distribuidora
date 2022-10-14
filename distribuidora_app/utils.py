@@ -47,7 +47,7 @@ def cantidadPorProducto(almacen=None):#recibo el queryset con de la clase almace
                 
                 if producto['producto'] == egreso['producto']: 
        
-                    lista_total_productos.append({'producto':ProductoModel.objects.get(id=producto['producto']),'cantidad':producto['cantidad__sum']- (egreso['cantidad__sum']-anulaciones['cantidad_total']) })
+                    lista_total_productos.append({'producto':ProductoModel.objects.get(id=producto['producto']),'cantidad':producto['cantidad__sum']- egreso['cantidad__sum'] })
                     encuentra=True
                  
                     
@@ -145,7 +145,9 @@ def cambio_estado_pedido(estado_actual,pedido):
             for producto in detalle_Pedido:
                 producto.producto_venta.cantidad_venta += producto.cantidad
                 producto.producto_venta.save() 
-                AlmacenStockModel.objects.create(cantidad=producto.cantidad,producto=producto.producto_venta.producto,movimiento='INGRESO',nro_pedido=producto.pedido)
+                movimietos_generadaos=AlmacenStockModel.objects.filter(nro_pedido=producto.pedido).all()
+                for movimiento in movimietos_generadaos:
+                    AlmacenStockModel.objects.create(cantidad=movimiento.cantidad,almacen=movimiento.almacen,producto=producto.producto_venta.producto,movimiento='INGRESO',nro_pedido=producto.pedido)
             
         
     else:
