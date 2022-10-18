@@ -15,10 +15,19 @@
 
 <div class="container ">
     <div class="row centrado">
-        <div class="col col-4 dashboard ">
-            <p><strong>Pedidos Solicitados</strong> </p>
-            <h1>30</h1>
+        <div class="col col-12 dashboard ">
+            <p><strong>{%if request.path != '/home/leidas' %} Notificaciones sin leer {%else%} Notificaciones leídas {%endif%}</strong> </p>
+            {%if perms.notificacion.view_notificacionmodel%}
+            {%if notificaciones%}
+           
+    
+            <h1>{{notificaciones|length}}</h1>
+            {%else%}
+            <h1>0</h1>
+            {%endif%}
+            {%endif%}
         </div>
+        <!--
         <div class="col col-4 dashboard"> 
             <p><strong>Pedidos En Preparacion</strong> </p>
             <h1>30</h1>
@@ -27,15 +36,18 @@
             <p><strong>Pedidos En Reparto</strong> </p>
             <h1>30</h1>
         </div>
+    -->
     </div>
     <div class="row">
-  
-       
-        {%if perms.notificacion.view_notificacionmodel%}
-        {%if notificaciones%}
-       
+        <div class="row">
+            <div class="col">
+                <button class="btn {%if request.path != '/home/leidas' %} active {%endif%} boton-not " ><a href="{%url 'home-app'%}">No Leído</a></button>
+                <button class="btn {%if request.path == '/home/leidas' %} active {%endif%} boton-not "><a href="{%url 'home-app-leida' 'leidas' %}">Leído</a></button>
+            </div>
 
-        <div class="col col-12 notificaciones-dashboard tabla_notificaciones">Notificaciones
+        </div>
+
+        <div class="col col-12 notificaciones-dashboard tabla_notificaciones">
             <table class="table table-striped " >
                 <thead>
                     <tr>
@@ -45,9 +57,15 @@
                         <th>
                             Descripcion
                         </th>
+                        <th>
+                            Acción
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
+                {%if perms.notificacion.view_notificacionmodel%}
+                {%if notificaciones%}
+                
                     {%for notificacion in notificaciones%}
                     <tr>
                         <td>
@@ -56,14 +74,43 @@
                         <td>
                             {{notificacion.descripcion}}
                         </td>
+                        <td>
+                            {%if request.path == '/home/leidas' %}
+                                {%if perms.notificacion.delete_notificacionmodel%}
+                                <a href="{% url 'borrar_notificacion' notificacion.id %}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                                      </svg>
+                                      
+                                {%endif%}
+                                </a>
+                            {%else%}
+                                {%if perms.notificacion.change_notificacionmodel%}
+                                <a href="{% url 'marcar_leida' notificacion.id %}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2-all" viewBox="0 0 16 16">
+                                        <path d="M12.354 4.354a.5.5 0 0 0-.708-.708L5 10.293 1.854 7.146a.5.5 0 1 0-.708.708l3.5 3.5a.5.5 0 0 0 .708 0l7-7zm-4.208 7-.896-.897.707-.707.543.543 6.646-6.647a.5.5 0 0 1 .708.708l-7 7a.5.5 0 0 1-.708 0z"/>
+                                        <path d="m5.354 7.146.896.897-.707.707-.897-.896a.5.5 0 1 1 .708-.708z"/>
+                                      </svg>
+                                      Leído
+                                </a>
+                                {%endif%}
+
+                            {%endif%}<!-- if path-->
+
+                        </td>
                     </tr>
                     {%endfor%}
+        
+                {%else%}
+                <tr>
+                    <td colspan="3">Sin notificaciones nuevas</td>
+                    
+                </tr>
+                {%endif%}
+                {%endif%}
                 </tbody>
               </table>
         </div>
-
-        {%endif%}
-        {%endif%}
     </div>
 
 </div>

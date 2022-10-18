@@ -42,14 +42,17 @@ def prohibido(request):
 class Home_App(View):
    
     
-    def get(self,request,*args,**kwargs):
+    def get(self,request,leidas=None,*args,**kwargs):
         HAS_ACCESS=False
         usuario=self.request.user
         if usuario.is_authenticated:
             context= {}
             HAS_ACCESS=True
             if usuario.has_perm('notificacion.view_notificacionmodel'):
-                notificaciones= NotificacionModel.objects.filter(state=True,cuenta_notificada=usuario.perfil.cuenta,leida=False).all().order_by('prioridad','-id')
+                if leidas != None:
+                    notificaciones= NotificacionModel.objects.filter(state=True,cuenta_notificada=usuario.perfil.cuenta,leida=True).all().order_by('-prioridad','-id')
+                else:
+                    notificaciones= NotificacionModel.objects.filter(state=True,cuenta_notificada=usuario.perfil.cuenta,leida=False).all().order_by('-prioridad','-id')
                 context['notificaciones']=notificaciones
 
             context['HAS_ACCESS']= HAS_ACCESS
