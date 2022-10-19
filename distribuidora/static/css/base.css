@@ -4,3 +4,12 @@ body{
 }
 
 /* herramientas */
+
+#campana{
+    color: rgba(29, 84, 70, 1);
+    margin-right: 10px
+}
+#campana:hover{
+    text-shadow: #666 10px 10px 10px;
+}
+

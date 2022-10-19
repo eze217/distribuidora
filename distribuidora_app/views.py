@@ -15,7 +15,7 @@ from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVent
 from notificacion.models import NotificacionModel
 
 #NOTIFICACIONES
-from notificacion.utils import notificacion_cambio_estado, notificacion_pedido_realizado
+from notificacion.utils import control_stock_venta, notificacion_cambio_estado, notificacion_pedido_realizado
 
 import json
 from user.models import Perfil
@@ -42,16 +42,19 @@ def prohibido(request):
 class Home_App(View):
    
     
-    def get(self,request,*args,**kwargs):
+    def get(self,request,leidas=None,*args,**kwargs):
         HAS_ACCESS=False
         usuario=self.request.user
         if usuario.is_authenticated:
             context= {}
             HAS_ACCESS=True
             if usuario.has_perm('notificacion.view_notificacionmodel'):
-                notificaciones= NotificacionModel.objects.filter(state=True,cuenta_notificada=usuario.perfil.cuenta,leida=False).all()
+                if leidas != None:
+                    notificaciones= NotificacionModel.objects.filter(state=True,cuenta_notificada=usuario.perfil.cuenta,leida=True).all().order_by('-prioridad','-id')
+                else:
+                    notificaciones= NotificacionModel.objects.filter(state=True,cuenta_notificada=usuario.perfil.cuenta,leida=False).all().order_by('-prioridad','-id')
                 context['notificaciones']=notificaciones
-        
+
             context['HAS_ACCESS']= HAS_ACCESS
             
            
@@ -564,8 +567,53 @@ class PedidosJsonView(View):
                                 producto_pedido.save()
                                 detalle_pedido= PedidoDetalleClienteModel.objects.create(pedido=nuevo_pedido,cantidad=cantidad_pedido,producto_venta=producto_pedido)
                                 #bajo el stock general creo el movimiento de egreso
+                                #Descuento del almacen correspondiente
                                 
-                                AlmacenStockModel.objects.create(cantidad=cantidad_pedido,producto=producto_pedido.producto,movimiento='EGRESO',nro_pedido=nuevo_pedido)
+                                user_staff=Perfil.objects.filter(usuario__is_staff=True).first()
+                                almacenes = EntregaModel.objects.filter(cuenta=user_staff.cuenta)
+                                stock_almacen = AlmacenStockModel.objects.filter(producto = producto_pedido.producto)
+                           
+                                lista_almacenes= []
+                               
+                                for almacen in almacenes:
+                                    almacen_dic={'almacen':almacen,'cantidad_ingreso':0,'cantidad_egreso':0}
+                                    lista_almacenes.append(almacen_dic)
+                                
+                          
+                                for stock in stock_almacen:
+   
+                                    if stock.movimiento == 'INGRESO':
+                                    
+                                        for almacen in lista_almacenes:
+                                        
+                                            if stock.almacen == almacen['almacen']:
+                                                almacen['cantidad_ingreso']+= stock.cantidad
+                                                
+                                    if stock.movimiento == 'EGRESO':
+                                        
+                                        for almacen in lista_almacenes:
+                                            if stock.almacen == almacen['almacen']:
+                                                almacen['cantidad_egreso']+= stock.cantidad 
+                         
+                                
+                                for almacen in lista_almacenes:
+                            
+                                    cantidad_total= almacen['cantidad_ingreso'] - almacen['cantidad_egreso']
+                                    
+                                    if cantidad_pedido >0:
+                                        if cantidad_pedido <= cantidad_total:
+                                            
+                                            AlmacenStockModel.objects.create(cantidad=cantidad_pedido,almacen= almacen['almacen'],producto=producto_pedido.producto,movimiento='EGRESO',nro_pedido=nuevo_pedido)
+                                            cantidad_total -= cantidad_pedido
+                                            cantidad_pedido=0
+                                        else:
+                                            AlmacenStockModel.objects.create(cantidad=cantidad_total,almacen= almacen['almacen'],producto=producto_pedido.producto,movimiento='EGRESO',nro_pedido=nuevo_pedido)
+                                            cantidad_pedido -= cantidad_total
+
+
+                                #CONTROLO STOCK PARA NOTICAR
+                                control_stock_venta(producto=producto_pedido.producto)
+
                             else: 
                                 #como no hay stock elimino el pedido y envio error
                                 error= True

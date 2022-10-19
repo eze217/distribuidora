@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('distribuidora_app.urls'),name='app_home'),
     path('login/',include('user.urls'),name='login'),
+    path('notificaciones/',include('notificacion.urls'),name='notificaciones'),
    
 ]

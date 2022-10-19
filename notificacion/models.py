@@ -13,9 +13,9 @@ class NotificacionModel(models.Model):
     usuario_creador = models.ForeignKey(User,on_delete=models.CASCADE,blank=False,null=False,verbose_name='Creo')
     cuenta_notificada = models.ForeignKey(CuentaModel,on_delete=models.CASCADE,blank=False,null=False,verbose_name='Notifica a:')
     TYPE_CHOICES = (
-        ('ALTA','ALTA'),
-        ('MEDIA','MEDIA'),
-        ('BAJA','BAJA')
+        ('1','ALTA'),
+        ('2','MEDIA'),
+        ('3','BAJA')
         )
 
     prioridad=models.CharField(verbose_name='Prioridad',choices=TYPE_CHOICES,max_length=10,blank=False,null=False)

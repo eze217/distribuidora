@@ -13,6 +13,9 @@ from .views import PedidosView,PedidoCreateView,PedidosJsonView,PedidoDetalleVie
 urlpatterns = [
     path('', home, name='landing_home'),
     path('home/',Home_App.as_view(),name='home-app'),
+    path('home/<str:leidas>',Home_App.as_view(),name='home-app-leida'),
+    
+
     path('proveedores/',ProveedoresView.as_view(),name='proveedores'),
     path('proveedores/<int:pk>',ProveedorDetalleView.as_view(),name='proveedor_detalle'),
     path('proveedores_delete/<int:pk>',proveedorEliminaView,name='proveedor_elimina'),
