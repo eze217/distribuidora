@@ -1,3 +1,5 @@
+from email.policy import HTTP
+import http
 from django.shortcuts import render,redirect
 from django.views import View
 from django.http.response import JsonResponse
@@ -15,13 +17,16 @@ class NotificacionesJsonItemView(View):
       
         if usuario.is_authenticated:
             if usuario.has_perm('notificacion.view_notificacionmodel'):
+               
                 notificaciones= NotificacionModel.objects.filter(state=True,cuenta_notificada=usuario.perfil.cuenta,leida=False).all().count()
-                
+               
                 data= {
                     'error': False,
                     'data':notificaciones
                 }
                 return JsonResponse (data)
+        
+        return JsonResponse ({})
 
 
 def marcar_leida(request,pk):

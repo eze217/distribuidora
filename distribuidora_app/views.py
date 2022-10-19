@@ -56,7 +56,7 @@ class Home_App(View):
                 context['notificaciones']=notificaciones
 
             context['HAS_ACCESS']= HAS_ACCESS
-            
+         
            
             return render(request,'app/home.html',context )
         else:

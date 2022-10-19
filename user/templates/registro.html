@@ -1,0 +1,33 @@
+{%extends 'core_template/base_generic.html' %}
+{%load static%}
+
+{% block title %} Login {% endblock %}
+
+{% block content %}
+<section class="vh-100" style="background-color: #405881;  ">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+          <div class="card shadow-2-strong" style="border-radius: 1rem;">
+            <div class="card-body p-5 text-center">
+  
+              <h3 class="mb-5">Complete sus datos para acceder al sistema</h3>
+
+              <form action="{% url 'fin_registro' %}" method="post"> {% csrf_token %}
+              <div class="form-outline mb-4">
+                <table>
+                    {{form.as_table}}   
+
+                </table>
+                <button class="btn btn-success btn-lg btn-block" type="submit">Confirmar</button>
+            </form>
+             
+  
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock  %}
