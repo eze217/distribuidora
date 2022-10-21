@@ -1,0 +1,105 @@
+{%extends 'core_template/base_generic.html' %}
+{%load static%}
+{%block css%}
+
+<link href="{% static 'css/proveedores.css' %}" rel="stylesheet" type="text/css" >
+
+{%endblock%}
+
+
+{%block content%}
+
+{% if  HAS_ACCESS %}
+
+
+
+<div class="container">
+<div class="container  " id="container_principal">
+   
+
+    <div class="row">
+        <div class="col-12 text-center">
+            <h5>Datos usuario</h5>
+        </div>
+        <div class="col-4">
+            <p>Nombre: {{request.user.first_name}}</p>
+            <p>Apellido: {{request.user.last_name}}</p>
+            <p>Email: {{request.user.email}}</p>            
+        </div>
+
+        <div class="col-4">
+            <p>Cuenta Facturación: {{request.user.perfil.cuenta.name}}</p>
+            <p>Domicilio: {{request.user.perfil.cuenta.domicilio}}</p>
+            <p>Telefono: {{request.user.perfil.cuenta.telefono}}</p>
+            <p>DNI/CIF: {{request.user.perfil.cuenta.nro_identificacion}}</p>
+            <p>Observaciones: {{request.user.perfil.cuenta.observaciones}}</p>
+            
+        </div>
+    </div>
+
+
+    <div class="row ">
+        <h5>Domicilios de entrega</h5>
+        <div class="col col-12 tabla_proveedores " >
+            <div >
+                <table class="table table-striped " id="productos_pedido">
+                    <thead>
+                        <tr>
+                            <th>
+                                Nombre
+                            </th>
+                            <th>
+                                Domicilio
+                            </th>                 
+                            <th>
+                                Telefono de contacto:
+                            </th>
+                            <th>
+                                Estado
+                            </th>
+                            <th>Acciones</th>
+                 
+                            
+                        </tr>
+                    </thead>
+                    <tbody id="contenido"> 
+                        {%if domicilios %}
+                                {%for domicilio in domicilios%}
+                                    <tr>
+                                        <td>{{domicilio.name}}</td>
+                                        <td>{{domicilio.address}}</td>
+                                        <td>{{domicilio.phone}}</td>
+                                        <td>{{domicilio.state}}</td>
+                                        <td></td>
+                                    </tr>
+                                {%endfor%}
+                              
+                        {%endif%}
+
+                    </tbody>
+                </table>
+            </div>
+            
+        
+        </div>
+        
+
+    </div>
+
+    
+
+
+
+
+{%endif%}
+
+
+
+{% block js%}
+
+
+{% endblock %}
+
+
+
+{%endblock%}
