@@ -136,7 +136,16 @@
 
 {%else%}
 
-DATOS
+<div class="container">
+    <div class="row">
+        <div class="text-center">
+            <h4> Aún no posee domicilios de entrega</h4>
+            <br>
+            <p>Para realizar pedidos debe poseer al menos un domicilio de entrega. Por ingrese un nuevo domicilio desde su <a href="{% url 'perfil'%}"><strong>PERFIL</strong></a></p>
+
+        </div>
+    </div>
+</div>
 
 
 {%endif%}
