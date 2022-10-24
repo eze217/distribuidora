@@ -1,6 +1,6 @@
 from dataclasses import fields
 from django.forms import forms,ModelForm
-from distribuidora_app.models import CuentaModel,ProductoModel,PedidoModel,PedidoDetalleModel,ProductoEnVenta
+from distribuidora_app.models import CuentaModel,ProductoModel,PedidoModel,PedidoDetalleModel,ProductoEnVenta,EntregaModel
 
 # ============================ PROVEEDOR  ============================
 class ProveedorForm(ModelForm):
@@ -58,3 +58,14 @@ class ProductoEnVentaEditForm(ModelForm):
     class Meta:
         model=ProductoEnVenta
         fields=['porcentaje_venta','cantidad_venta']
+
+
+
+
+# ============================================================================================================
+#========================= PERFIL =====================
+
+class EntregaCreateForm(ModelForm):
+    class Meta:
+        model= EntregaModel
+        fields= '__all__'

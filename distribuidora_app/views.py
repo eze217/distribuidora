@@ -878,3 +878,13 @@ def cambioEstadoProdVenta(request,pk):
         return redirect('no_autorizado')
     #no logueado
     return redirect('landing_home')
+
+
+
+# ============================================================================================================
+#========================= PERFIL =====================
+
+
+class PerfilView(View):
+    def get(request):
+        pass

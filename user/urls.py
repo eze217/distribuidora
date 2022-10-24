@@ -7,7 +7,9 @@ urlpatterns = [
     path('', ControlLogin.as_view(), name='login'),
     path('logout/', logout_user, name='logout'),
     path('registro/',NuevoUserView.as_view(),name='registro'),
+    path('registro/proveedor/<int:pk>',NuevoUserView.as_view(),name='user_proveedor'),
     path('fin_registro/',creacion_cuenta,name='fin_registro'),
+
     
    
 ]

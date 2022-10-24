@@ -12,6 +12,8 @@
 
 {% if  HAS_ACCESS %}
 
+{% if  entrega %}
+
 <div class="container">
 <div class="container  " id="container_principal">
     <h5>Creacion de pedidos:</h5>
@@ -131,8 +133,14 @@
 <a href="{%url 'pedidos'%}" class="btn btn-secondary oculto" id="botonlistapedidos">Lista de pedidos</a>
 
 </div>
-{%endif%}
 
+{%else%}
+
+DATOS
+
+
+{%endif%}
+{%endif%}<!-- HAS ACESS-->
 
 
 {% block js%}

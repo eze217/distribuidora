@@ -74,7 +74,7 @@ def logout_user(request):
 #Creación user nuevo.
 
 class NuevoUserView(View):
-    def get ( self, request , *args, **kwargs):
+    def get ( self, request,pk=None , *args, **kwargs):
         #este registro es solo para clientes
 
         form= UserForm()
@@ -86,7 +86,7 @@ class NuevoUserView(View):
         
         return render(request,'new_user_cliente.html',context)
     
-    def post(self, request , *args, **kwargs):
+    def post(self, request,pk =None , *args, **kwargs):
 
         
         form= UserForm(request.POST)
@@ -94,11 +94,20 @@ class NuevoUserView(View):
         if form.is_valid():
             user_cliente= User()
             user_cliente=form.save()
-            group = Group.objects.get(name='cliente')
-            user_cliente.groups.add(group)
-            Perfil.objects.create(usuario=user_cliente,is_proveedor=False,is_cliente=True)
+            if pk != None:
+                if self.request.user.has_perm('add_user'):
+                    group = Group.objects.get(name='proveedor')
+                    user_cliente.groups.add(group)
+                    cuenta_proveedor = CuentaModel.objects.get(id = pk)
+                    Perfil.objects.create(usuario=user_cliente,is_proveedor=True,is_cliente=False,cuenta = cuenta_proveedor)
+                    return redirect('proveedor_detalle',pk)
+                return redirect('no_autorizado')
+            else:
+                group = Group.objects.get(name='cliente')
+                user_cliente.groups.add(group)
+                Perfil.objects.create(usuario=user_cliente,is_proveedor=False,is_cliente=True)
                
-        return redirect('landing_home')
+        return redirect('home-app')
 
 
 #creacion cuenta
