@@ -884,5 +884,18 @@ def cambioEstadoProdVenta(request,pk):
 
 
 class PerfilView(View):
-    def get(request):
-        pass
+    def get(self,request,*args,**kwargs):
+        usuario = self.request.user
+        HAS_ACCESS=False
+        if usuario.is_authenticated:
+            if usuario.has_perm('distribuidora_app.add_entregamodel'):
+                HAS_ACCESS= True
+                context ={
+                    'HAS_ACCESS': HAS_ACCESS,
+                    'domicilios': EntregaModel.objects.filter(cuenta=usuario.perfil.cuenta).all()
+                }
+                return render(request,'app/perfil/perfil.html',context)
+            else:
+                return redirect('no_autorizado')
+        else:
+            return redirect('landing')

@@ -28,7 +28,10 @@
         </div>
 
         <div class="col-4">
-            <p>Cuenta Facturación: {{request.user.perfil.cuenta.name}}</p>
+            
+            
+
+            <p>Cuenta Facturación:{%if request.user.is_staff%} <a href="{%url 'proveedor_detalle' request.user.perfil.cuenta.id %}">{{request.user.perfil.cuenta.name}}</a>{%else%} {{request.user.perfil.cuenta.name}}{%endif%}</p>
             <p>Domicilio: {{request.user.perfil.cuenta.domicilio}}</p>
             <p>Telefono: {{request.user.perfil.cuenta.telefono}}</p>
             <p>DNI/CIF: {{request.user.perfil.cuenta.nro_identificacion}}</p>
