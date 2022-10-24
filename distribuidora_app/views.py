@@ -77,18 +77,16 @@ class ProveedoresView(View):
                 form=ProveedorForm()
 
 
-                #proveedoresList= CuentaModel.objects.filter(state=True).all().exclude(usuario.perfil.is_cliente)
+                #cuentasList= CuentaModel.objects.filter(state=True).all().exclude()
   
                 #buscar los proveedores que son solo proveedores
                 proveedoresPerfil=Perfil.objects.filter(is_proveedor=True).all()
                 
                 proveedoresList=[]
                 for pp in proveedoresPerfil:
-                    if pp.is_proveedor:
-                        
+                    if pp.cuenta not in  proveedoresList:
                         proveedoresList.append(pp.cuenta)
                
-
 
                 
 
