@@ -5,7 +5,7 @@ from django.http.response import JsonResponse
 from django.contrib.auth.models import User
 
 
-from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm,ProductoEditForm
+from distribuidora_app.forms import EntregaCreateForm, ProveedorForm,ProductoAdminForm,ProductoForm,ProductoEditForm
 from distribuidora_app.forms import PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 from distribuidora_app.forms import ProductoEnVentaEditForm
@@ -116,6 +116,8 @@ class ProveedoresView(View):
                 
                 nuevo_proveedor= CuentaModel.objects.create(name=formulario.cleaned_data['name'],domicilio=formulario.cleaned_data['domicilio'],telefono=formulario.cleaned_data['telefono'],nro_identificacion=formulario.cleaned_data['nro_identificacion'])
                 nuevo_proveedor.save()
+                #Creo perfil para la cuenta
+                Perfil.objects.create(is_cliente=False,is_proveedor=True,cuenta=nuevo_proveedor)
 
             return redirect('proveedores' )
         else:
@@ -637,10 +639,7 @@ class PedidosJsonView(View):
 
                             for producto in detalle_pedido:
                                 list_producto_detalle.append(producto.json())
-
-
-                            
-
+ 
 
                             
                     except  :
@@ -666,7 +665,7 @@ class PedidosJsonView(View):
 
       
         return redirect('pedidos')
-  
+
        
 class PedidoDetalleView(View):
     def get (self,request,pk,*args,**kwargs):
@@ -892,9 +891,32 @@ class PerfilView(View):
                 HAS_ACCESS= True
                 context ={
                     'HAS_ACCESS': HAS_ACCESS,
-                    'domicilios': EntregaModel.objects.filter(cuenta=usuario.perfil.cuenta).all()
+                    'domicilios': EntregaModel.objects.filter(cuenta=usuario.perfil.cuenta).all(),
+                    'form_domicilios':EntregaCreateForm(),
                 }
                 return render(request,'app/perfil/perfil.html',context)
+            else:
+                return redirect('no_autorizado')
+        else:
+            return redirect('landing')
+
+
+    def post(self,request,*args,**kwargs):
+        usuario = self.request.user
+        
+        if usuario.is_authenticated:
+            if usuario.has_perm('distribuidora_app.add_entregamodel'):
+                
+
+                form= EntregaCreateForm(request.POST)
+
+                if form.is_valid():
+                    domicilio= EntregaModel()
+                    domicilio = form.save(commit=False)
+                    domicilio.cuenta = usuario.perfil.cuenta
+                    domicilio.save()
+
+                return redirect('perfil')
             else:
                 return redirect('no_autorizado')
         else:

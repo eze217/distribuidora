@@ -35,7 +35,10 @@
                             {%endif%}
                         {%if usuarios%}
                         {%for usuario in usuarios%}
+                        {%if usuario.usuario != none%}
                         <li>{{usuario.usuario}}</li>
+                        
+                        {%endif%}
                         {%endfor%}
 
                         {%endif%}

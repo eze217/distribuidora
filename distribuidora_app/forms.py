@@ -69,3 +69,4 @@ class EntregaCreateForm(ModelForm):
     class Meta:
         model= EntregaModel
         fields= '__all__'
+        exclude=['cuenta']

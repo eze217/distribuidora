@@ -95,7 +95,7 @@ class NuevoUserView(View):
             user_cliente= User()
             user_cliente=form.save()
             if pk != None:
-                if self.request.user.has_perm('add_user'):
+                if self.request.user.has_perm('auth.add_user'):
                     group = Group.objects.get(name='proveedor')
                     user_cliente.groups.add(group)
                     cuenta_proveedor = CuentaModel.objects.get(id = pk)
