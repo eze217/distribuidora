@@ -183,6 +183,9 @@ def proveedorEliminaView(request,pk):
 
     if usuario.is_authenticated and usuario.is_active:
         if  usuario.is_staff and usuario.has_perm('distribuidora_app.delete_cuentamodel'):
+
+            if proveedor == usuario.perfil.cuenta:
+                return redirect('proveedor_detalle',pk)
             
             proveedor.state=False
             proveedor.save()
@@ -883,17 +886,26 @@ def cambioEstadoProdVenta(request,pk):
 
 
 class PerfilView(View):
-    def get(self,request,*args,**kwargs):
+    def get(self,request,pk=None,*args,**kwargs):
         usuario = self.request.user
         HAS_ACCESS=False
         if usuario.is_authenticated:
             if usuario.has_perm('distribuidora_app.add_entregamodel'):
                 HAS_ACCESS= True
+                
                 context ={
                     'HAS_ACCESS': HAS_ACCESS,
                     'domicilios': EntregaModel.objects.filter(cuenta=usuario.perfil.cuenta).all(),
                     'form_domicilios':EntregaCreateForm(),
                 }
+
+
+                if pk!=None:
+
+                    context['form_edit_domicilio']=EntregaCreateForm(instance=EntregaModel.objects.get(id=pk))
+                    context['docimilio_editable']=pk
+
+
                 return render(request,'app/perfil/perfil.html',context)
             else:
                 return redirect('no_autorizado')
@@ -901,20 +913,29 @@ class PerfilView(View):
             return redirect('landing')
 
 
-    def post(self,request,*args,**kwargs):
+    def post(self,request,pk=None,*args,**kwargs):
         usuario = self.request.user
         
         if usuario.is_authenticated:
             if usuario.has_perm('distribuidora_app.add_entregamodel'):
                 
+                if pk == None:
+                    print('nuevo')
+                    form= EntregaCreateForm(request.POST)
 
-                form= EntregaCreateForm(request.POST)
+                    if form.is_valid():
+                        domicilio= EntregaModel()
+                        domicilio = form.save(commit=False)
+                        domicilio.cuenta = usuario.perfil.cuenta
+                        domicilio.save()
+                else:
+                    print('edit')
+                    domicilio_editar=EntregaModel.objects.get(id=pk)
+                    form= EntregaCreateForm(request.POST,instance=domicilio_editar)
 
-                if form.is_valid():
-                    domicilio= EntregaModel()
-                    domicilio = form.save(commit=False)
-                    domicilio.cuenta = usuario.perfil.cuenta
-                    domicilio.save()
+                    if form.is_valid():
+                        domicilio_editar = form.save()
+                        
 
                 return redirect('perfil')
             else:

@@ -42,6 +42,7 @@ urlpatterns = [
     path('productos_venta_cancel/<int:pk>',cambioEstadoProdVenta,name='productos_venta_cancel'),
 
     path('perfil/',PerfilView.as_view(),name='perfil'),
+    path('perfil/<int:pk>',PerfilView.as_view(),name='perfil_edit_dom'),
 
 
 

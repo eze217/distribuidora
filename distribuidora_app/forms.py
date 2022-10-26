@@ -70,3 +70,6 @@ class EntregaCreateForm(ModelForm):
         model= EntregaModel
         fields= '__all__'
         exclude=['cuenta']
+
+
+
