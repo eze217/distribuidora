@@ -86,7 +86,7 @@ def control_stock_venta(producto):
     egreso=AlmacenStockModel.objects.filter(producto=producto,movimiento='EGRESO').aggregate(cantidad_total=Sum('cantidad'))
     anulaciones=AlmacenStockModel.objects.filter(producto=producto,movimiento='INGRESO',nro_pedido__usuario__perfil__is_cliente= True).aggregate(cantidad_total=Sum('cantidad'))
     
-    PORCENTAJE_NOTIFICACION = 10
+    PORCENTAJE_NOTIFICACION = 90
     if anulaciones['cantidad_total'] == None:
         anulaciones['cantidad_total']=0
 
@@ -102,7 +102,7 @@ def control_stock_venta(producto):
         #notifico a la empresa
         #traigo la cuenta de la empresa
         user_staff=Perfil.objects.filter(usuario__is_staff= True ).first()
-        asunto='STOCK POR DEBAJO DEL 10%'
+        asunto='STOCK POR DEBAJO DEL {}%'.format(PORCENTAJE_NOTIFICACION)
         descripcion='El stock del producto {}, ha bajado del porcentaje minimo, realizar un nuevo pedido, STOCK ACTUAL:{} unidades, {} % '.format(producto,resto,porcentaje_restante)
         usuario_creador=user_staff.usuario
         cuenta_notificada=user_staff.cuenta

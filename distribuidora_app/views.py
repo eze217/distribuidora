@@ -1,4 +1,6 @@
 
+from datetime import datetime
+from multiprocessing import context
 from django.shortcuts import render,redirect
 from django.views import View
 from django.http.response import JsonResponse
@@ -942,3 +944,105 @@ class PerfilView(View):
                 return redirect('no_autorizado')
         else:
             return redirect('landing')
+
+
+
+#========================= INFORMES =====================
+
+
+class InformesView(View):
+    def get(self, request, *args, **kwargs):
+        usuario = self.request.user
+        HAS_ACCESS= False
+        if usuario.is_authenticated:
+            HAS_ACCESS= True
+            #if usuario.has_perm(''):
+            if usuario:
+                agno= datetime.now().year
+                mes= datetime.now().month
+                ventas=PedidoModel.objects.filter(estado='ENTREGADO',usuario__perfil__is_cliente= True ,modified_date__year=agno,modified_date__month=mes).all()
+                
+                balance_list=[]
+                resultado_periodo=0
+                for pedido in ventas:
+                    detalle_venta=PedidoDetalleClienteModel.objects.filter(pedido=pedido).all()
+                    pedido_balance={'pedido': pedido,
+                                    'productos':[],
+                                    'total_ganancia':0
+                                    }
+                    total_ganancia=0
+                    for producto in detalle_venta:
+                        producto_bal={'nombre':producto.producto_venta.producto.name,
+                        'costo':producto.producto_venta.producto.precio * producto.cantidad,
+                        'precio_venta':producto.costo_total(),
+                        'ganancia':producto.costo_total() - (producto.producto_venta.producto.precio * producto.cantidad)
+                        }
+                        pedido_balance['productos'].append(producto_bal)
+                        total_ganancia+=producto_bal['ganancia']
+                    pedido_balance['total_ganancia']=total_ganancia
+                    resultado_periodo += pedido_balance['total_ganancia']
+                    
+                    balance_list.append(pedido_balance)
+
+
+                context={
+                    'HAS_ACCESS':HAS_ACCESS,
+                    'balance_list': balance_list,
+                    'resultado_periodo':resultado_periodo,
+                    'periodo':'{}/{}'.format(mes,agno)
+                }
+
+                return render(request,'app/informes/informes.html',context)
+
+            return redirect('no_autorizado')
+        return redirect('landing')
+
+    def post(self, request, *args, **kwargs):
+        usuario= self.request.user
+        HAS_ACCESS= False
+        if usuario.is_authenticated:
+            #if usuario.has_perm():
+            if usuario:
+                HAS_ACCESS=True
+                desde =request.POST.get('start')
+                hasta =request.POST.get('end')
+
+                ventas=PedidoModel.objects.filter(estado='ENTREGADO',usuario__perfil__is_cliente= True ,modified_date__gte=desde, modified_date__lte=hasta ).all()
+                
+                balance_list=[]
+                resultado_periodo=0
+                for pedido in ventas:
+                    detalle_venta=PedidoDetalleClienteModel.objects.filter(pedido=pedido).all()
+                    pedido_balance={'pedido': pedido,
+                                    'productos':[],
+                                    'total_ganancia':0
+                                    }
+                    total_ganancia=0
+                    for producto in detalle_venta:
+                        producto_bal={'nombre':producto.producto_venta.producto.name,
+                        'costo':producto.producto_venta.producto.precio * producto.cantidad,
+                        'precio_venta':producto.costo_total(),
+                        'ganancia':producto.costo_total() - (producto.producto_venta.producto.precio * producto.cantidad)
+                        }
+                        pedido_balance['productos'].append(producto_bal)
+                        total_ganancia+=producto_bal['ganancia']
+                    pedido_balance['total_ganancia']=total_ganancia
+                    resultado_periodo += pedido_balance['total_ganancia']
+                    
+                    balance_list.append(pedido_balance)
+
+
+                context={
+                    'HAS_ACCESS':HAS_ACCESS,
+                    'balance_list': balance_list,
+                    'resultado_periodo':resultado_periodo,
+                    'periodo': '{} | {}'.format(desde,hasta),
+                    'desde': desde,
+                    'hasta':hasta
+                }
+
+                return render(request,'app/informes/informes.html',context)
+
+
+            return redirect ('no_autorizado')
+        return redirect('landing')

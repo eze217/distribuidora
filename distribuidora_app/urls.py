@@ -9,7 +9,7 @@ from .views import ProductosView,productoEliminaView
 
 from .views import PedidosView,PedidoCreateView,PedidosJsonView,PedidoDetalleView,StockView,ProductosVentaView,cambioEstadoProdVenta
 
-from .views import PerfilView
+from .views import PerfilView,InformesView
 
 
 urlpatterns = [
@@ -40,10 +40,11 @@ urlpatterns = [
     path('productos_venta/',ProductosVentaView.as_view(),name='productos_venta'),
     path('productos_venta/<int:pk>',ProductosVentaView.as_view(),name='productos_venta_edit'),
     path('productos_venta_cancel/<int:pk>',cambioEstadoProdVenta,name='productos_venta_cancel'),
+    
+    path('informes/',InformesView.as_view(),name='informes'),
 
     path('perfil/',PerfilView.as_view(),name='perfil'),
     path('perfil/<int:pk>',PerfilView.as_view(),name='perfil_edit_dom'),
-
 
 
 
