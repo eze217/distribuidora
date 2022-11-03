@@ -16,7 +16,9 @@
 <div class="container  ">
 
     <div class="row">
+        {%if request.user.is_staff%}
         <a href="{%url 'informes' %}">Informe de ventas</a>
+        {%endif%}
     </div>
 
     <div class="row ">

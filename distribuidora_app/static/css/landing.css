@@ -1,3 +1,10 @@
+body{
+
+   *background-color: rgba(74, 174, 246, 0.573);
+
+
+}
+
 h1{
     text-align: center;
     margin-top: 30%;
@@ -5,15 +12,40 @@ h1{
 }
 
 .principal{
-    height: 100vh;
-    *background-image:url( "../Imagenes/portada.png");
-    background-repeat: no-repeat;
-    background-size: cover;
+    height: 95vh;
+    
 }
 
 .h2{
    
     text-align: center;
    
+}
+
+.imagenes{
+    background-color: #6666;
+    height: 100vh;
+
+}
+
+h4{
+    text-align: center;
+    color: rgb(243, 243, 235);
+    font-size: 70px;
+    font-weight: 100;
+}
+
+#contenedorLogin{
+    display: flex;
+    align-items: flex-end;
+    justify-content: right;
+    
+}
+
+#login{
+    padding: 10px;
+    border: solid 1px #6666;
+    margin-top: 10px;
+    
 }
 

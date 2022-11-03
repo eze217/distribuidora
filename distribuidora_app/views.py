@@ -1,10 +1,11 @@
 
 from datetime import datetime
 from multiprocessing import context
+from unicodedata import name
 from django.shortcuts import render,redirect
 from django.views import View
 from django.http.response import JsonResponse
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group,Permission
 
 
 from distribuidora_app.forms import EntregaCreateForm, ProveedorForm,ProductoAdminForm,ProductoForm,ProductoEditForm
@@ -27,6 +28,7 @@ def home (request):
     
     if request.method == 'GET':
         if request.user.is_authenticated:
+            #print(request.user.get_user_permissions())
             return redirect('home-app')
         return render(request,'landing/index.html',{})
 
@@ -956,8 +958,7 @@ class InformesView(View):
         HAS_ACCESS= False
         if usuario.is_authenticated:
             HAS_ACCESS= True
-            #if usuario.has_perm(''):
-            if usuario:
+            if usuario.is_staff:
                 agno= datetime.now().year
                 mes= datetime.now().month
                 ventas=PedidoModel.objects.filter(estado='ENTREGADO',usuario__perfil__is_cliente= True ,modified_date__year=agno,modified_date__month=mes).all()
@@ -993,7 +994,6 @@ class InformesView(View):
                 }
 
                 return render(request,'app/informes/informes.html',context)
-
             return redirect('no_autorizado')
         return redirect('landing')
 
@@ -1002,7 +1002,7 @@ class InformesView(View):
         HAS_ACCESS= False
         if usuario.is_authenticated:
             #if usuario.has_perm():
-            if usuario:
+            if usuario.is_staff:
                 HAS_ACCESS=True
                 desde =request.POST.get('start')
                 hasta =request.POST.get('end')

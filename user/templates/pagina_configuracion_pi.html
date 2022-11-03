@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Configuracion inicial</title>
+</head>
+<body>
+    <h1>Configuración inicial</h1>
+    <p>Se creara automaticamente el usuario administrador, cuanta empresa, super-user django y todos los grupos de permisos necesarios para los 3 tipos de usuarios</p>
+    <ul>
+        <li>
+            Empleados
+        </li>
+        <li>
+            Proveedores
+        </li>
+        <li>
+            Clientes
+        </li>
+    </ul>
+<hr>
+    <div>
+        <h3>Empleados</h3>
+        <p>Usuario con la capacidad de administrar toda la plataforma.</p>
+        <li>Modificar estado de pedidos</li>
+        <li>Ver todo los pedidos</li>
+        <li>Realizar pedidos a Proveedores</li> 
+        <li>Ver el stock </li> 
+        <li>Informes </li> 
+        <li>Crear/modificar/eliminar proveedores</li> 
+        <li>Crear/modificar/eliminar productos</li> 
+        <li>Crear nuevos usuarios:
+            Empleados /
+            Proveedores
+        </li>
+        
+    </div>
+    <div>
+        <h3>Proveedores</h3>
+        <p>Usuario con la capacidad de administrar sus propios productos y pedidos</p>
+        <li>Crear productos</li>
+        <li>Verificar pedidos que se le hayan realizado</li>
+    </div>
+    <div>
+        <h3>Clientes</h3>
+        <p>Usuario con registro autonomo en la plataforma.</p>
+        <li>Crea nuevos pedidos en su cuenta a la empresa</li>
+        <li>Modifica sus datos de perfil</li>
+    </div>
+    <hr>
+    <div>
+        <h3>Creación usuario Admin</h3>
+        <p>Los datos de la cuenta empresa se generan automaticamente. Una vez logueado en la aplicación deberá ir al Perfil a editarlos</p>
+        <form action="" method="post">{% csrf_token %}
+            <label for="nombre">Nombre admin:</label>
+            <input type="text" name="nombre" id="nombre"><br>
+            <label for="apellido">Apellido admin:</label>
+            <input type="text" name="apellido" id="apellido"><br>
+            <label for="email">Email admin:</label>
+            <input type="email" name="email" id="email"><br>
+            <label for="pass">Password admin:</label>
+            <input type="password" name="pass" id="pass"><br><br>
+            <button type="submit">Confirmar</button>
+            
+            
+        </form>
+        
+    </div>
+</body>
+</html>

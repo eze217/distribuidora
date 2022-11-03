@@ -1,12 +1,13 @@
 
-from django.shortcuts import render
+
+from django.shortcuts import render,HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic import View
 from django.contrib.auth.models import User,Group
 from django.contrib.auth import login, authenticate,logout
 
 from distribuidora_app.models import CuentaModel
-from .models import Perfil
+from .models import Perfil,PrimerLoginModel
 from .forms import UserForm
 from distribuidora_app.forms import ProveedorForm
 
@@ -45,6 +46,7 @@ class ControlLogin(View):
                     if perfil!= None:
                         usuario= authenticate(username=user_name,password=user_pass)
                         login(self.request,usuario)
+                        
                         if perfil.cuenta != None :
                             return redirect('home-app')
                         else:
@@ -106,6 +108,7 @@ class NuevoUserView(View):
                 group = Group.objects.get(name='cliente')
                 user_cliente.groups.add(group)
                 Perfil.objects.create(usuario=user_cliente,is_proveedor=False,is_cliente=True)
+                login(request,user_cliente)
                
         return redirect('home-app')
 
@@ -129,4 +132,41 @@ def creacion_cuenta(request):
 
 
 
-#en el control login verificar que el usuario tenga perfil asociado, caso contrario redirigir a la pantalla de configuraciones(deberia ser una sin navbar)
+#===========================    PRIMER INGRESO, CONFIGURACION INICIAL =========================================
+
+def registro_plataforma(request):
+    if request.method == 'GET':
+
+        return render(request,'pagina_configuracion_pi.html',{})
+    
+    
+    try:
+        primer_ingreso= PrimerLoginModel.objects.all()
+   
+        if len(primer_ingreso) > 0:
+            return redirect('home-app')
+        
+        primer_ingreso= PrimerLoginModel.objects.create(primer_login=True)
+        
+        nombre_admin=request.POST['nombre']
+        apellido_admin=request.POST['apellido']
+        email_admin=request.POST['email']
+        pass_admin=request.POST['pass']
+
+        
+        user=primer_ingreso.creoPrimerLogin(email=email_admin,password=pass_admin,nombre=nombre_admin,apellido=apellido_admin)
+        
+        
+        
+        return render(request,'confirmacion.html',{'superuser':'superAdmin','password':'Fase1234-'})
+
+    except:
+        print('ya creado')
+        return redirect('landing_home')
+    
+
+    
+
+    
+
+
