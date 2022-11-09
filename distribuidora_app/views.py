@@ -12,10 +12,12 @@ from distribuidora_app.forms import EntregaCreateForm, ProveedorForm,ProductoAdm
 from distribuidora_app.forms import PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 from distribuidora_app.forms import ProductoEnVentaEditForm
+from distribuidora_app.forms import ContactoForm
 
 from distribuidora_app.models import AlmacenStockModel, PedidoDetalleClienteModel, PedidoDetalleModel, PedidoModel, CuentaModel, ProductoAlmacenado,ProductoModel,EntregaModel,ProductoEnVenta
 from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVenta,ProductosNOenVenta,cambio_estado_pedido
 from notificacion.models import NotificacionModel
+
 
 #NOTIFICACIONES
 from notificacion.utils import control_stock_venta, notificacion_cambio_estado, notificacion_pedido_realizado
@@ -30,7 +32,33 @@ def home (request):
         if request.user.is_authenticated:
             #print(request.user.get_user_permissions())
             return redirect('home-app')
-        return render(request,'landing/index.html',{})
+        
+        try:
+            contacto=Perfil.objects.filter(usuario__is_staff= True).first()
+            
+            context={}
+            if contacto:
+                context={
+                    'telefono': contacto.cuenta.telefono,
+                    'direccion':contacto.cuenta.domicilio,
+                    'contacto':ContactoForm()
+                }    
+        except:
+            return redirect('registro_plataforma')
+
+        return render(request,'landing/index.html',context)
+
+    if request.method == 'POST':
+        contacto=ContactoForm(request.POST)
+        if contacto.is_valid():
+            descripcion= "El contacto {}, con casilla de mail : {}, a dejado el siguiente mensaje:\n{}".format(contacto.cleaned_data['nombre'],contacto.cleaned_data['email'],contacto.cleaned_data['mensaje'])
+            try:
+                empresa=Perfil.objects.filter(usuario__is_staff=True).first()
+                NotificacionModel.objects.create(asunto='Nuevo contacto',descripcion=descripcion,usuario_creador=empresa.usuario,cuenta_notificada=empresa.cuenta,prioridad='1')
+            except:
+                pass    
+        return redirect('landing_home')
+    return redirect('landing_home')
 
 
 def prohibido(request):

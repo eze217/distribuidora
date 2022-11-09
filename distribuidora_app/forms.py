@@ -1,5 +1,6 @@
 from dataclasses import fields
-from django.forms import forms,ModelForm
+from django.forms import ModelForm
+from django import forms
 from distribuidora_app.models import CuentaModel,ProductoModel,PedidoModel,PedidoDetalleModel,ProductoEnVenta,EntregaModel
 
 # ============================ PROVEEDOR  ============================
@@ -70,6 +71,18 @@ class EntregaCreateForm(ModelForm):
         model= EntregaModel
         fields= '__all__'
         exclude=['cuenta']
+
+
+#========================= Contacto =====================
+
+class ContactoForm(forms.Form):
+ 
+    nombre=forms.CharField(max_length=20,required=True)
+    email=forms.EmailField(required=True)
+    mensaje=forms.CharField(max_length=200)
+    
+    
+
 
 
 
