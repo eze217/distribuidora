@@ -10,9 +10,16 @@ h1{
     *margin-top: 30%;
     font-size: 150px;
 }
+@media  (max-width: 1000px) {
+    h1 {
+       font-size: 80px;
+       
+   
+   }
+} 
 
 .principal{
-    height: 95vh;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-items: center;
@@ -47,12 +54,15 @@ h1{
     display: flex;
     align-items: center;
     background:  #6666;
-    height: fit-content;
+    *height: fit-content;
     margin-bottom: 50px;
     padding: 20px;
     border-radius: 10px;
-    min-height: 500px;
+    min-height: 300px;
 
+}
+.info p{
+    font-size: 20px;
 }
 
 h4{
@@ -128,3 +138,7 @@ h4{
   
 }
 
+
+.fondo{
+    background: rgba(54, 53, 53, 0.991);;
+}
