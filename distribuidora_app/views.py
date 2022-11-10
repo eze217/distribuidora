@@ -24,13 +24,14 @@ from notificacion.utils import control_stock_venta, notificacion_cambio_estado, 
 
 import json
 from user.models import Perfil
+from django.contrib.auth.forms import PasswordChangeForm
 
 
 def home (request):
     
     if request.method == 'GET':
         if request.user.is_authenticated:
-            #print(request.user.get_user_permissions())
+            
             return redirect('home-app')
         
         try:
@@ -929,6 +930,8 @@ class PerfilView(View):
                     'HAS_ACCESS': HAS_ACCESS,
                     'domicilios': EntregaModel.objects.filter(cuenta=usuario.perfil.cuenta).all(),
                     'form_domicilios':EntregaCreateForm(),
+                    'form_setpass':PasswordChangeForm(usuario)
+                    
                 }
 
 

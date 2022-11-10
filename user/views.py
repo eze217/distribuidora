@@ -11,6 +11,11 @@ from .models import Perfil,PrimerLoginModel
 from .forms import UserForm
 from distribuidora_app.forms import ProveedorForm
 
+from .utils import creoPrimerLogin
+
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+
 
 # Create your views here.
 
@@ -132,6 +137,21 @@ def creacion_cuenta(request):
 
 
 
+def set_pass(request):
+    usuario = request.user
+    if request.method == 'POST':
+        if usuario.is_authenticated:
+            form = PasswordChangeForm(usuario, request.POST)
+            if form.is_valid():
+                user = form.save()
+                update_session_auth_hash(request, user)  # Important!
+       
+                return redirect('perfil')
+        
+
+                  
+
+
 #===========================    PRIMER INGRESO, CONFIGURACION INICIAL =========================================
 
 def registro_plataforma(request):
@@ -154,9 +174,9 @@ def registro_plataforma(request):
         pass_admin=request.POST['pass']
 
         
-        user=primer_ingreso.creoPrimerLogin(email=email_admin,password=pass_admin,nombre=nombre_admin,apellido=apellido_admin)
+        user=creoPrimerLogin(email=email_admin,password=pass_admin,nombre=nombre_admin,apellido=apellido_admin)
         
-        
+        print(user)
         
         return render(request,'confirmacion.html',{'superuser':'superAdmin','password':'Fase1234-'})
 

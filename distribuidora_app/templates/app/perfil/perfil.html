@@ -24,7 +24,11 @@
         <div class="col-4">
             <p>Nombre: {{request.user.first_name}}</p>
             <p>Apellido: {{request.user.last_name}}</p>
-            <p>Email: {{request.user.email}}</p>            
+            <p>Email: {{request.user.email}}</p>   
+            <button type="button" class="btn btn-dark"  data-bs-toggle="modal"data-bs-target="#setpass">
+                Cambiar contraseña
+            </button>
+                 
         </div>
 
         <div class="col-4">
@@ -174,6 +178,49 @@
 
 {%endif%}
 
+<!-- Modal SET PASSWORD -->
+<div
+  class="modal fade "
+  id="setpass"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog ">
+    <div class="modal-content ">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Cambio de contraseña</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body fondo">
+        <div class="card shadow-2-strong" style="border-radius: 1rem">
+          <div class="card-body p-5 text-center">
+            <h3 class="mb-5"></h3>
+
+            <form action="{%url 'set_pass'%}" method="post">
+              {% csrf_token %}
+                
+                    {{form_setpass.as_p}}
+                
+
+              <button class="btn btn-success btn-lg btn-block" type="submit">
+                Confirmar
+              </button>
+            </form>
+
+         
+          </div>
+        </div>
+      </div>
+     
+    </div>
+  </div>
+</div>
 
 
 {% block js%}

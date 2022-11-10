@@ -38,8 +38,8 @@
             </form>
         </div>
         <div class="col col-12 tabla_proveedores ">
-            <table class="table table-active ">
-                <thead>
+            <table class="table">
+                <thead class="">
                     <tr>
                         <th>
                             Fecha solicitado
@@ -85,7 +85,7 @@
                                 {%endfor%}
                             </tr>
                             <tr>
-                                <td colspan="5"><strong>Total Ganancia Pedido {{pedido.pedido}}</strong> </td>
+                                <td colspan="5" style="background: rgb(156, 153, 153) ;"><strong>Total Ganancia Pedido {{pedido.pedido}}</strong> </td>
                                 <td> <strong>{{pedido.total_ganancia}}  &euro;</strong></td>
                             </tr>
                         {%endfor%}
@@ -93,9 +93,9 @@
                 </tbody>
               </table>
 
+              
+            </div>
         <p>Total Periodo : {{resultado_periodo}} &euro;</p>
-
-        </div>
         
     </div>
     
