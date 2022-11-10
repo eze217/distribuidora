@@ -1,0 +1,109 @@
+{%extends 'core_template/base_generic.html' %}
+{%load static%}
+{%block css%}
+
+<link href="{% static 'css/proveedores.css' %}" rel="stylesheet" type="text/css" >
+
+{%endblock%}
+
+
+{%block content%}
+
+{% if  HAS_ACCESS %}
+
+
+<div class="container  ">
+
+
+    <div class="row ">
+        <h5>Resultado del periodo: {{periodo}}</h5>
+        <p><a href="{%url 'informes'%}"> Mes actual </a></p>
+
+        <div class="col-lg-8">
+            <h6>Seleccionar perido:</h6>
+
+            <form action="" method="POST"> {%csrf_token%}
+
+                        <label for="start">Desde:</label>
+                        <input type="date" id="start" name="start"
+                        {% if desde %} value = {{desde}} {% else %}value="2022-10-22" {%endif%}
+                        min="2022-01-01" max="">
+                        <label for="end">Hasta:</label>
+                        <input type="date" id="end" name="end"
+                        {% if desde %} value = {{hasta}} {% else %}value="2022-10-22" {%endif%}
+                        min="2022-01-01" max="">
+                        <button type="submit" class="btn">Buscar</button>
+                   
+               
+            </form>
+        </div>
+        <div class="col col-12 tabla_proveedores ">
+            <table class="table">
+                <thead class="">
+                    <tr>
+                        <th>
+                            Fecha solicitado
+                        </th>
+                        <th>
+                            Nro.Pedido
+                        </th>
+                        <th>
+                            Producto
+                        </th>
+                        <th>
+                            Egreso 
+                        </th>
+                   
+                        <th>
+                            Ingreso
+                        </th>
+                        <th>
+                            Resultado
+                        </th>
+
+                
+                        <th>
+
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%if balance_list %}
+                        {%for pedido in balance_list %}
+                            <tr>
+                                <td>{{pedido.pedido.modified_date}}</td>
+                                <td>{{pedido.pedido}}</td>
+                            </tr>
+                            {%for producto in pedido.productos %}
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>{{producto.nombre}}</td>
+                                <td>{{producto.costo}}</td>
+                                <td>{{producto.precio_venta}}</td>
+                                <td>{{producto.ganancia}}</td>
+                                {%endfor%}
+                            </tr>
+                            <tr>
+                                <td colspan="5" style="background: rgb(156, 153, 153) ;"><strong>Total Ganancia Pedido {{pedido.pedido}}</strong> </td>
+                                <td> <strong>{{pedido.total_ganancia}}  &euro;</strong></td>
+                            </tr>
+                        {%endfor%}
+                    {%endif%}
+                </tbody>
+              </table>
+
+              
+            </div>
+        <p>Total Periodo : {{resultado_periodo}} &euro;</p>
+        
+    </div>
+    
+
+
+
+
+{%endif%}
+
+
+{%endblock%}

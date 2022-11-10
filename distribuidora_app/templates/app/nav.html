@@ -1,3 +1,4 @@
+{%if request.user.perfil.cuenta != None %}
 <header>
     <nav class="navbar navbar-expand-lg bg-light">
         <div class="container-fluid">
@@ -12,15 +13,12 @@
                 <a class="nav-link {% if request.path == '/pedidos/'  or request.path == '/pedidos_create/'%} active {% endif %}" aria-current="page" href="{%url 'pedidos'%}">Pedidos</a>
               </li>
               {%endif%}
+              
               {% if perms.distribuidora_app.view_productomodel %}
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/productos/' %} active {% endif %} " aria-current="page" href="{%url 'productos'%}">Productos</a>
               </li>
               {%endif%}
-              
-              <li class="nav-item">
-                <a class="nav-link" href="#">Facturas</a>        
-              </li>
               
               <!-- Opciones solo para empresa-->
               {% if request.user.is_staff %}
@@ -39,7 +37,7 @@
             
          
                 <span id='cant_notificaciones'class=" nav-item navbar-text">
-              
+                  
                 </span>
         
             <a href="{%url 'home-app'%}">
@@ -57,7 +55,7 @@
                 </button>
                 <ul class="dropdown-menu">
                   <!-- Dropdown menu links -->
-                  <li><a class="dropdown-item" href="">Opciones</a></li>
+                  <li><a class="dropdown-item" href="{% url 'perfil'%}">Perfil</a></li>
                   <li><a class="dropdown-item" href="{%url 'logout'%}">Logout</a></li>
             
                 </ul>
@@ -70,3 +68,4 @@
         </div>
       </nav>
 </header>
+{%endif%}

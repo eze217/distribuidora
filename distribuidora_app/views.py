@@ -1,32 +1,65 @@
 
+from datetime import datetime
+from multiprocessing import context
+from unicodedata import name
 from django.shortcuts import render,redirect
 from django.views import View
 from django.http.response import JsonResponse
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group,Permission
 
 
-from distribuidora_app.forms import ProveedorForm,ProductoAdminForm,ProductoForm,ProductoEditForm
+from distribuidora_app.forms import EntregaCreateForm, ProveedorForm,ProductoAdminForm,ProductoForm,ProductoEditForm
 from distribuidora_app.forms import PedidoCreateForm
 from distribuidora_app.forms import PedidoEdicionForm
 from distribuidora_app.forms import ProductoEnVentaEditForm
+from distribuidora_app.forms import ContactoForm
 
 from distribuidora_app.models import AlmacenStockModel, PedidoDetalleClienteModel, PedidoDetalleModel, PedidoModel, CuentaModel, ProductoAlmacenado,ProductoModel,EntregaModel,ProductoEnVenta
 from distribuidora_app.utils import cantidadPorProducto ,verificoCantidad_EnVenta,ProductosNOenVenta,cambio_estado_pedido
 from notificacion.models import NotificacionModel
+
 
 #NOTIFICACIONES
 from notificacion.utils import control_stock_venta, notificacion_cambio_estado, notificacion_pedido_realizado
 
 import json
 from user.models import Perfil
+from django.contrib.auth.forms import PasswordChangeForm
 
 
 def home (request):
     
     if request.method == 'GET':
         if request.user.is_authenticated:
+            
             return redirect('home-app')
-        return render(request,'landing/index.html',{})
+        
+        try:
+            contacto=Perfil.objects.filter(usuario__is_staff= True).first()
+            
+            context={}
+            if contacto:
+                context={
+                    'telefono': contacto.cuenta.telefono,
+                    'direccion':contacto.cuenta.domicilio,
+                    'contacto':ContactoForm()
+                }    
+        except:
+            return redirect('registro_plataforma')
+
+        return render(request,'landing/index.html',context)
+
+    if request.method == 'POST':
+        contacto=ContactoForm(request.POST)
+        if contacto.is_valid():
+            descripcion= "El contacto {}, con casilla de mail : {}, a dejado el siguiente mensaje:\n{}".format(contacto.cleaned_data['nombre'],contacto.cleaned_data['email'],contacto.cleaned_data['mensaje'])
+            try:
+                empresa=Perfil.objects.filter(usuario__is_staff=True).first()
+                NotificacionModel.objects.create(asunto='Nuevo contacto',descripcion=descripcion,usuario_creador=empresa.usuario,cuenta_notificada=empresa.cuenta,prioridad='1')
+            except:
+                pass    
+        return redirect('landing_home')
+    return redirect('landing_home')
 
 
 def prohibido(request):
@@ -56,7 +89,7 @@ class Home_App(View):
                 context['notificaciones']=notificaciones
 
             context['HAS_ACCESS']= HAS_ACCESS
-            
+         
            
             return render(request,'app/home.html',context )
         else:
@@ -77,18 +110,16 @@ class ProveedoresView(View):
                 form=ProveedorForm()
 
 
-                #proveedoresList= CuentaModel.objects.filter(state=True).all().exclude(usuario.perfil.is_cliente)
+                #cuentasList= CuentaModel.objects.filter(state=True).all().exclude()
   
                 #buscar los proveedores que son solo proveedores
                 proveedoresPerfil=Perfil.objects.filter(is_proveedor=True).all()
                 
                 proveedoresList=[]
                 for pp in proveedoresPerfil:
-                    if pp.is_proveedor:
-                        
+                    if pp.cuenta not in  proveedoresList:
                         proveedoresList.append(pp.cuenta)
                
-
 
                 
 
@@ -118,6 +149,8 @@ class ProveedoresView(View):
                 
                 nuevo_proveedor= CuentaModel.objects.create(name=formulario.cleaned_data['name'],domicilio=formulario.cleaned_data['domicilio'],telefono=formulario.cleaned_data['telefono'],nro_identificacion=formulario.cleaned_data['nro_identificacion'])
                 nuevo_proveedor.save()
+                #Creo perfil para la cuenta
+                Perfil.objects.create(is_cliente=False,is_proveedor=True,cuenta=nuevo_proveedor)
 
             return redirect('proveedores' )
         else:
@@ -183,6 +216,9 @@ def proveedorEliminaView(request,pk):
 
     if usuario.is_authenticated and usuario.is_active:
         if  usuario.is_staff and usuario.has_perm('distribuidora_app.delete_cuentamodel'):
+
+            if proveedor == usuario.perfil.cuenta:
+                return redirect('proveedor_detalle',pk)
             
             proveedor.state=False
             proveedor.save()
@@ -639,10 +675,7 @@ class PedidosJsonView(View):
 
                             for producto in detalle_pedido:
                                 list_producto_detalle.append(producto.json())
-
-
-                            
-
+ 
 
                             
                     except  :
@@ -668,7 +701,7 @@ class PedidosJsonView(View):
 
       
         return redirect('pedidos')
-  
+
        
 class PedidoDetalleView(View):
     def get (self,request,pk,*args,**kwargs):
@@ -878,3 +911,169 @@ def cambioEstadoProdVenta(request,pk):
         return redirect('no_autorizado')
     #no logueado
     return redirect('landing_home')
+
+
+
+# ============================================================================================================
+#========================= PERFIL =====================
+
+
+class PerfilView(View):
+    def get(self,request,pk=None,*args,**kwargs):
+        usuario = self.request.user
+        HAS_ACCESS=False
+        if usuario.is_authenticated:
+            if usuario.has_perm('distribuidora_app.add_entregamodel'):
+                HAS_ACCESS= True
+                
+                context ={
+                    'HAS_ACCESS': HAS_ACCESS,
+                    'domicilios': EntregaModel.objects.filter(cuenta=usuario.perfil.cuenta).all(),
+                    'form_domicilios':EntregaCreateForm(),
+                    'form_setpass':PasswordChangeForm(usuario)
+                    
+                }
+
+
+                if pk!=None:
+
+                    context['form_edit_domicilio']=EntregaCreateForm(instance=EntregaModel.objects.get(id=pk))
+                    context['docimilio_editable']=pk
+
+
+                return render(request,'app/perfil/perfil.html',context)
+            else:
+                return redirect('no_autorizado')
+        else:
+            return redirect('landing')
+
+
+    def post(self,request,pk=None,*args,**kwargs):
+        usuario = self.request.user
+        
+        if usuario.is_authenticated:
+            if usuario.has_perm('distribuidora_app.add_entregamodel'):
+                
+                if pk == None:
+                    print('nuevo')
+                    form= EntregaCreateForm(request.POST)
+
+                    if form.is_valid():
+                        domicilio= EntregaModel()
+                        domicilio = form.save(commit=False)
+                        domicilio.cuenta = usuario.perfil.cuenta
+                        domicilio.save()
+                else:
+                    print('edit')
+                    domicilio_editar=EntregaModel.objects.get(id=pk)
+                    form= EntregaCreateForm(request.POST,instance=domicilio_editar)
+
+                    if form.is_valid():
+                        domicilio_editar = form.save()
+                        
+
+                return redirect('perfil')
+            else:
+                return redirect('no_autorizado')
+        else:
+            return redirect('landing')
+
+
+
+#========================= INFORMES =====================
+
+
+class InformesView(View):
+    def get(self, request, *args, **kwargs):
+        usuario = self.request.user
+        HAS_ACCESS= False
+        if usuario.is_authenticated:
+            HAS_ACCESS= True
+            if usuario.is_staff:
+                agno= datetime.now().year
+                mes= datetime.now().month
+                ventas=PedidoModel.objects.filter(estado='ENTREGADO',usuario__perfil__is_cliente= True ,modified_date__year=agno,modified_date__month=mes).all()
+                
+                balance_list=[]
+                resultado_periodo=0
+                for pedido in ventas:
+                    detalle_venta=PedidoDetalleClienteModel.objects.filter(pedido=pedido).all()
+                    pedido_balance={'pedido': pedido,
+                                    'productos':[],
+                                    'total_ganancia':0
+                                    }
+                    total_ganancia=0
+                    for producto in detalle_venta:
+                        producto_bal={'nombre':producto.producto_venta.producto.name,
+                        'costo':producto.producto_venta.producto.precio * producto.cantidad,
+                        'precio_venta':producto.costo_total(),
+                        'ganancia':producto.costo_total() - (producto.producto_venta.producto.precio * producto.cantidad)
+                        }
+                        pedido_balance['productos'].append(producto_bal)
+                        total_ganancia+=producto_bal['ganancia']
+                    pedido_balance['total_ganancia']=total_ganancia
+                    resultado_periodo += pedido_balance['total_ganancia']
+                    
+                    balance_list.append(pedido_balance)
+
+
+                context={
+                    'HAS_ACCESS':HAS_ACCESS,
+                    'balance_list': balance_list,
+                    'resultado_periodo':resultado_periodo,
+                    'periodo':'{}/{}'.format(mes,agno)
+                }
+
+                return render(request,'app/informes/informes.html',context)
+            return redirect('no_autorizado')
+        return redirect('landing')
+
+    def post(self, request, *args, **kwargs):
+        usuario= self.request.user
+        HAS_ACCESS= False
+        if usuario.is_authenticated:
+            #if usuario.has_perm():
+            if usuario.is_staff:
+                HAS_ACCESS=True
+                desde =request.POST.get('start')
+                hasta =request.POST.get('end')
+
+                ventas=PedidoModel.objects.filter(estado='ENTREGADO',usuario__perfil__is_cliente= True ,modified_date__gte=desde, modified_date__lte=hasta ).all()
+                
+                balance_list=[]
+                resultado_periodo=0
+                for pedido in ventas:
+                    detalle_venta=PedidoDetalleClienteModel.objects.filter(pedido=pedido).all()
+                    pedido_balance={'pedido': pedido,
+                                    'productos':[],
+                                    'total_ganancia':0
+                                    }
+                    total_ganancia=0
+                    for producto in detalle_venta:
+                        producto_bal={'nombre':producto.producto_venta.producto.name,
+                        'costo':producto.producto_venta.producto.precio * producto.cantidad,
+                        'precio_venta':producto.costo_total(),
+                        'ganancia':producto.costo_total() - (producto.producto_venta.producto.precio * producto.cantidad)
+                        }
+                        pedido_balance['productos'].append(producto_bal)
+                        total_ganancia+=producto_bal['ganancia']
+                    pedido_balance['total_ganancia']=total_ganancia
+                    resultado_periodo += pedido_balance['total_ganancia']
+                    
+                    balance_list.append(pedido_balance)
+
+
+                context={
+                    'HAS_ACCESS':HAS_ACCESS,
+                    'balance_list': balance_list,
+                    'resultado_periodo':resultado_periodo,
+                    'periodo': '{} | {}'.format(desde,hasta),
+                    'desde': desde,
+                    'hasta':hasta
+                }
+
+                return render(request,'app/informes/informes.html',context)
+
+
+            return redirect ('no_autorizado')
+        return redirect('landing')
