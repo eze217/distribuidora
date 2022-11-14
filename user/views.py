@@ -113,9 +113,8 @@ class NuevoUserView(View):
                 group = Group.objects.get(name='cliente')
                 user_cliente.groups.add(group)
                 Perfil.objects.create(usuario=user_cliente,is_proveedor=False,is_cliente=True)
-                login(request,user_cliente)
-               
-        return redirect('home-app')
+                #login(request,user_cliente)          
+        return redirect('landing_home')
 
 
 #creacion cuenta

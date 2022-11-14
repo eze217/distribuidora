@@ -1,24 +1,26 @@
-window.onload = (event) =>{
+
 
     suma_total()
    
-};
+
 
 
 
 
 function suma_total(){
-    let tabla = document.getElementById('productos_pedidos')
    
+    let tabla = document.getElementById('productos_pedidos')
+
     let costo_total=0
     for (var i=1, row; row = tabla.rows[i]; i++){
         // leo datos de la fila
         
        for ( var j=0,col; col= row.cells[j]; j++){
-    
+     
             if(j == 3){
                 
                 costo_total += parseFloat(col.innerHTML)
+            
               
             }
        
@@ -38,7 +40,7 @@ function edito_pedido(){
     form_datos.classList.toggle('oculto')
     lapiz_edicion.classList.toggle('oculto')
     
-
+    
 }
 
 

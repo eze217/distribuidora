@@ -434,7 +434,7 @@ class PedidoCreateView(View):
                         #genero listado de proveedores 
                         proveedoresList=[]
                         for pp in proveedoresPerfil:
-                            if pp.is_proveedor:
+                            if pp.is_proveedor and pp.cuenta not in proveedoresList:
                                 proveedoresList.append(pp.cuenta)
    
                         context['proveedoresList']=proveedoresList
