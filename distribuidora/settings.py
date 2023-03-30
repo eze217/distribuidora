@@ -132,8 +132,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_WHITELIST={
-'distribuidora-production.up.railway.app',
- 
+'https://distribuidora-production.up.railway.app',
+'http://0.0.0.0:6167',
 }
 
 
