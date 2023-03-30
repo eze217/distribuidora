@@ -41,13 +41,10 @@ INSTALLED_APPS = [
     'user',
     'distribuidora_app',
     'notificacion',
-    'corsheaders',
-    
-    
+  
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -134,17 +131,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ORIGIN_WHITELIST=(
-'https://distribuidora-production.up.railway.app',
-'https://distribuidora-production.up',
-'https://distribuidora-production.up.railway.app',
-)
+
 CORS_ALLOWED_ORIGINS = [
     'https://distribuidora-production.up.railway.app'
 ]
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
-
 
 
 
