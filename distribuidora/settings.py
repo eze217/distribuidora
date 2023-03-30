@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     'user',
     'distribuidora_app',
     'notificacion',
+    'corsheaders',
+    
+    
 ]
 
 MIDDLEWARE = [
@@ -132,7 +135,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_WHITELIST={
-'https://distribuidora-production.up.railway.app'
+'https://distribuidora-production.up.railway.app',
+'https://distribuidora-production.up',
 }
 
 
