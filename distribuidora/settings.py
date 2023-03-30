@@ -81,8 +81,12 @@ WSGI_APPLICATION = 'distribuidora.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'distribuidora.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'railway',
+        'USER': 'root',
+        'PASSWORD': 'pfEALTGzsIAsiksntIKT',
+        'HOST': 'containers-us-west-98.railway.app',
+        'PORT': '7057',
     }
 }
 
